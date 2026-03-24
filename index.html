@@ -162,12 +162,27 @@ const Store = {
       {id:'calfs-on-machine',name:'Calfs on Machine',category:'legs',muscleGroups:['Calves'],pb:{kg:154,reps:10,date:'2026-03-10'},pbHistory:[{kg:154,reps:10,date:'2026-03-10'}]},
       {id:'outter-thigh-machine',name:'Outter Thigh Machine',category:'legs',muscleGroups:['Abductors'],pb:{kg:91,reps:10,date:'2026-03-23'},pbHistory:[{kg:91,reps:10,date:'2026-03-23'}]},
       {id:'backwards-lunges-bar',name:'Backwards Lunges with Bar',category:'legs',muscleGroups:['Quads','Glutes'],pb:null,pbHistory:[]},
+
+      // CARDIO
+      {id:'cycling',name:'Cycling',category:'cardio',muscleGroups:['Cardio','Legs'],type:'cardio',inputLabels:{field1:'MINS',field2:'KM'},pb:null,pbHistory:[]},
+      {id:'incline-walk',name:'Incline Walk',category:'cardio',muscleGroups:['Cardio','Legs'],type:'cardio',inputLabels:{field1:'MINS',field2:'INCLINE'},pb:null,pbHistory:[]},
+
+      // ABS / STOMACH
+      {id:'crunches',name:'Crunches',category:'abs',muscleGroups:['Abs'],type:'bodyweight',pb:null,pbHistory:[]},
+      {id:'sit-ups',name:'Sit Ups',category:'abs',muscleGroups:['Abs'],type:'bodyweight',pb:null,pbHistory:[]},
+      {id:'leg-raises',name:'Leg Raises',category:'abs',muscleGroups:['Lower Abs'],type:'bodyweight',pb:null,pbHistory:[]},
+      {id:'plank',name:'Plank',category:'abs',muscleGroups:['Core'],type:'cardio',inputLabels:{field1:'SECS',field2:''},pb:null,pbHistory:[]},
+      {id:'russian-twists',name:'Russian Twists',category:'abs',muscleGroups:['Obliques'],type:'bodyweight',pb:null,pbHistory:[]},
+      {id:'mountain-climbers',name:'Mountain Climbers',category:'abs',muscleGroups:['Core','Cardio'],type:'bodyweight',pb:null,pbHistory:[]},
+      {id:'bicycle-crunches',name:'Bicycle Crunches',category:'abs',muscleGroups:['Abs','Obliques'],type:'bodyweight',pb:null,pbHistory:[]},
+      {id:'ab-rollout',name:'Ab Rollout',category:'abs',muscleGroups:['Core'],type:'bodyweight',pb:null,pbHistory:[]},
     ];
 
     const workoutDays = [
       {id:'chest',name:'Chest',icon:'fitness_center',color:'primary',exerciseIds:['standing-chest-press','bench-press','incline-bench-press','incline-dumbbells','flat-bench-dumbbells','pec-fly-machine','skull-crushers','triceps-extension-machine','bar-pull-down','dips']},
       {id:'legs',name:'Legs',icon:'directions_run',color:'secondary',exerciseIds:['leg-extension','lunges-on-track','squats-kettlebells','leg-press','hack-squat-machine','prone-leg-curl','leg-curl-machine','calf-raise-free-weights','calfs-on-machine','outter-thigh-machine','backwards-lunges-bar']},
       {id:'shoulders-triceps',name:'Shoulders / Triceps',icon:'sports_martial_arts',color:'tertiary',exerciseIds:['shoulder-press-dumbbells','straight-bar-arm-raise','shoulder-shrugs','shoulder-press-machine','triceps-extension-machine','bar-pull-down','single-arm-raises-machine','skull-crushers','shoulder-lift-bar','dips']},
+      {id:'cardio-abs',name:'Cardio / Abs',icon:'directions_bike',color:'error',exerciseIds:['cycling','incline-walk','crunches','sit-ups','leg-raises','plank','russian-twists','mountain-climbers','bicycle-crunches','ab-rollout']},
     ];
 
     this.data = {
@@ -215,11 +230,19 @@ const PBEngine = {
     if (!ex) return { isNewPb: false };
     kg = parseFloat(kg) || 0;
     reps = parseInt(reps) || 0;
-    if (!ex.pb) return { isNewPb: true, oldPb: null };
-    const isDipsLike = ex.pb.kg === 0 && ex.id === 'dips';
-    if (isDipsLike) {
+    if (!ex.pb) return { isNewPb: (kg > 0 || reps > 0), oldPb: null };
+    const exType = ex.type || 'strength';
+    if (exType === 'cardio') {
+      // For cardio: field1 (mins/secs) stored in kg, field2 (km/incline) stored in reps
+      // PB = longer duration OR same duration with higher field2
+      const isNew = (kg > ex.pb.kg) || (kg === ex.pb.kg && reps > ex.pb.reps);
+      return { isNewPb: isNew, oldPb: {...ex.pb} };
+    }
+    if (exType === 'bodyweight') {
+      // Bodyweight: only reps matter (kg=0)
       return { isNewPb: reps > ex.pb.reps, oldPb: {...ex.pb} };
     }
+    // Strength: heavier weight wins, or same weight with more reps
     const isNew = (kg > ex.pb.kg) || (kg === ex.pb.kg && reps > ex.pb.reps);
     return { isNewPb: isNew, oldPb: {...ex.pb} };
   },
@@ -298,8 +321,11 @@ const SessionManager = {
     const set = ex.sets[setIndex];
     set.completed = !set.completed;
     if (set.completed) {
+      const ex = Store.getExercise(exerciseId);
+      const exType = ex?.type || 'strength';
       const result = PBEngine.checkPB(exerciseId, set.kg, set.reps);
-      if (result.isNewPb && set.kg !== '' && set.reps !== '') {
+      const hasData = exType === 'bodyweight' ? set.reps !== '' : (exType === 'cardio' ? set.kg !== '' : (set.kg !== '' && set.reps !== ''));
+      if (result.isNewPb && hasData) {
         set.isNewPb = true;
         ex.newPb = true;
         session.pbsAchieved = session.exercises.filter(e => e.newPb).length;
@@ -667,7 +693,7 @@ const Views = {
           ${days.map(day => {
             const exCount = day.exerciseIds.length;
             const lastSession = Store.data.sessions.find(s => s.workoutDayId === day.id);
-            const colorMap = { primary:'from-primary/20 to-primary/5 border-primary/20', secondary:'from-secondary/20 to-secondary/5 border-secondary/20', tertiary:'from-tertiary/20 to-tertiary/5 border-tertiary/20' };
+            const colorMap = { primary:'from-primary/20 to-primary/5 border-primary/20', secondary:'from-secondary/20 to-secondary/5 border-secondary/20', tertiary:'from-tertiary/20 to-tertiary/5 border-tertiary/20', error:'from-error/20 to-error/5 border-error/20' };
             const bgClass = colorMap[day.color] || colorMap.primary;
             return `
               <div class="bg-gradient-to-r ${bgClass} rounded-2xl border overflow-hidden">
@@ -748,7 +774,20 @@ const Views = {
         ${session.exercises.map((sessionEx, exIdx) => {
           const ex = Store.getExercise(sessionEx.exerciseId);
           if (!ex) return '';
-          const pbText = ex.pb ? `${ex.pb.kg > 0 ? ex.pb.kg+'kg x ' : ''}${ex.pb.reps} ${ex.pb.kg === 0 ? 'reps' : 'reps'}` : 'No PB';
+          const exType = ex.type || 'strength';
+          const pbText = ex.pb ? this._formatPBText(ex) : 'No PB';
+          // Determine input labels based on exercise type
+          let label1 = 'KG', label2 = 'REPS', input1Mode = 'decimal', input1Step = '0.5';
+          if (exType === 'cardio') {
+            label1 = ex.inputLabels?.field1 || 'MINS';
+            label2 = ex.inputLabels?.field2 || 'KM';
+            input1Mode = 'numeric'; input1Step = '1';
+          } else if (exType === 'bodyweight') {
+            label1 = ''; label2 = 'REPS';
+            input1Mode = 'numeric'; input1Step = '1';
+          }
+          const hideField1 = exType === 'bodyweight';
+          const hideField2 = exType === 'cardio' && !ex.inputLabels?.field2;
           return `
             <div id="ex-${sessionEx.exerciseId}" class="bg-surface-container-low rounded-xl overflow-hidden shadow-xl ${sessionEx.newPb ? 'ring-1 ring-primary/40 pb-glow' : ''}">
               <div class="p-4 space-y-3">
@@ -756,7 +795,10 @@ const Views = {
                   <div class="min-w-0">
                     <h3 class="text-base font-headline font-bold text-on-surface leading-tight truncate">${ex.name}</h3>
                     <div class="flex flex-wrap gap-1.5 mt-1">
-                      ${ex.muscleGroups.map(mg => `<span class="bg-secondary/10 text-secondary text-[9px] px-2 py-0.5 rounded-full font-bold tracking-wider uppercase">${mg}</span>`).join('')}
+                      ${ex.muscleGroups.map(mg => {
+                        const tagColor = mg === 'Cardio' ? 'error' : 'secondary';
+                        return `<span class="bg-${tagColor}/10 text-${tagColor} text-[9px] px-2 py-0.5 rounded-full font-bold tracking-wider uppercase">${mg}</span>`;
+                      }).join('')}
                     </div>
                   </div>
                   <div class="bg-surface-container-highest rounded-lg px-2.5 py-1 text-center shrink-0">
@@ -768,37 +810,87 @@ const Views = {
                 ${sessionEx.newPb ? '<div class="inline-block bg-primary text-black text-[9px] font-black px-2 py-0.5 rounded-sm tracking-tighter uppercase italic shadow-[0_0_10px_rgba(156,255,147,0.5)] pb-badge-animate">NEW PB</div>' : ''}
 
                 <div class="space-y-2">
-                  ${sessionEx.sets.map((set, sIdx) => `
-                    <div class="grid grid-cols-12 gap-2 items-center" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}">
-                      <div class="col-span-1 text-zinc-500 font-headline font-bold text-xs text-center">${sIdx+1}</div>
-                      <div class="col-span-4">
-                        <div class="bg-surface-container-highest rounded-lg p-2 flex items-center ${set.completed ? 'opacity-60' : ''}">
-                          <input class="bg-transparent border-none p-0 w-full text-center font-headline font-bold focus:ring-0 text-on-surface text-sm" type="number" inputmode="decimal" step="0.5" placeholder="--" value="${set.kg}" data-action="set-kg" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}" ${set.completed ? 'readonly' : ''}/>
-                          <span class="text-[8px] text-zinc-500 font-bold pr-0.5 shrink-0">KG</span>
+                  ${sessionEx.sets.map((set, sIdx) => {
+                    if (hideField1) {
+                      // Bodyweight: just reps input, wider
+                      return `
+                        <div class="grid grid-cols-12 gap-2 items-center" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}">
+                          <div class="col-span-1 text-zinc-500 font-headline font-bold text-xs text-center">${sIdx+1}</div>
+                          <div class="col-span-9">
+                            <div class="bg-surface-container-highest rounded-lg p-2 flex items-center ${set.completed ? 'opacity-60' : ''}">
+                              <input class="bg-transparent border-none p-0 w-full text-center font-headline font-bold focus:ring-0 text-on-surface text-sm" type="number" inputmode="numeric" step="1" placeholder="--" value="${set.reps}" data-action="set-reps" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}" ${set.completed ? 'readonly' : ''}/>
+                              <span class="text-[8px] text-zinc-500 font-bold pr-0.5 shrink-0">REPS</span>
+                            </div>
+                          </div>
+                          <div class="col-span-2 flex justify-end">
+                            ${set.completed ? `
+                              <button class="w-8 h-8 rounded-full ${set.isNewPb ? 'bg-primary shadow-lg shadow-primary/30' : 'bg-primary'} flex items-center justify-center text-on-primary active:scale-90 transition-transform" data-action="toggle-set" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}">
+                                <span class="material-symbols-outlined text-base" style="font-variation-settings:'FILL' 1">check</span>
+                              </button>
+                            ` : `
+                              <button class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-zinc-500 border border-outline-variant/10 active:scale-90 transition-transform" data-action="toggle-set" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}">
+                                <span class="material-symbols-outlined text-base">check</span>
+                              </button>
+                            `}
+                          </div>
+                        </div>`;
+                    }
+                    if (hideField2) {
+                      // Cardio with single field (e.g. Plank - just secs)
+                      return `
+                        <div class="grid grid-cols-12 gap-2 items-center" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}">
+                          <div class="col-span-1 text-zinc-500 font-headline font-bold text-xs text-center">${sIdx+1}</div>
+                          <div class="col-span-9">
+                            <div class="bg-surface-container-highest rounded-lg p-2 flex items-center ${set.completed ? 'opacity-60' : ''}">
+                              <input class="bg-transparent border-none p-0 w-full text-center font-headline font-bold focus:ring-0 text-on-surface text-sm" type="number" inputmode="numeric" step="1" placeholder="--" value="${set.kg}" data-action="set-kg" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}" ${set.completed ? 'readonly' : ''}/>
+                              <span class="text-[8px] text-zinc-500 font-bold pr-0.5 shrink-0">${label1}</span>
+                            </div>
+                          </div>
+                          <div class="col-span-2 flex justify-end">
+                            ${set.completed ? `
+                              <button class="w-8 h-8 rounded-full ${set.isNewPb ? 'bg-primary shadow-lg shadow-primary/30' : 'bg-primary'} flex items-center justify-center text-on-primary active:scale-90 transition-transform" data-action="toggle-set" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}">
+                                <span class="material-symbols-outlined text-base" style="font-variation-settings:'FILL' 1">check</span>
+                              </button>
+                            ` : `
+                              <button class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-zinc-500 border border-outline-variant/10 active:scale-90 transition-transform" data-action="toggle-set" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}">
+                                <span class="material-symbols-outlined text-base">check</span>
+                              </button>
+                            `}
+                          </div>
+                        </div>`;
+                    }
+                    // Standard 2-field layout (strength: KG/REPS, cardio: MINS/KM)
+                    return `
+                      <div class="grid grid-cols-12 gap-2 items-center" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}">
+                        <div class="col-span-1 text-zinc-500 font-headline font-bold text-xs text-center">${sIdx+1}</div>
+                        <div class="col-span-4">
+                          <div class="bg-surface-container-highest rounded-lg p-2 flex items-center ${set.completed ? 'opacity-60' : ''}">
+                            <input class="bg-transparent border-none p-0 w-full text-center font-headline font-bold focus:ring-0 text-on-surface text-sm" type="number" inputmode="${input1Mode}" step="${input1Step}" placeholder="--" value="${set.kg}" data-action="set-kg" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}" ${set.completed ? 'readonly' : ''}/>
+                            <span class="text-[8px] text-zinc-500 font-bold pr-0.5 shrink-0">${label1}</span>
+                          </div>
                         </div>
-                      </div>
-                      <div class="col-span-1 flex justify-center text-zinc-600">
-                        <span class="material-symbols-outlined text-xs">close</span>
-                      </div>
-                      <div class="col-span-4">
-                        <div class="bg-surface-container-highest rounded-lg p-2 flex items-center ${set.completed ? 'opacity-60' : ''}">
-                          <input class="bg-transparent border-none p-0 w-full text-center font-headline font-bold focus:ring-0 text-on-surface text-sm" type="number" inputmode="numeric" step="1" placeholder="--" value="${set.reps}" data-action="set-reps" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}" ${set.completed ? 'readonly' : ''}/>
-                          <span class="text-[8px] text-zinc-500 font-bold pr-0.5 shrink-0">REPS</span>
+                        <div class="col-span-1 flex justify-center text-zinc-600">
+                          <span class="material-symbols-outlined text-xs">close</span>
                         </div>
-                      </div>
-                      <div class="col-span-2 flex justify-end">
-                        ${set.completed ? `
-                          <button class="w-8 h-8 rounded-full ${set.isNewPb ? 'bg-primary shadow-lg shadow-primary/30' : 'bg-primary'} flex items-center justify-center text-on-primary active:scale-90 transition-transform" data-action="toggle-set" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}">
-                            <span class="material-symbols-outlined text-base" style="font-variation-settings:'FILL' 1">check</span>
-                          </button>
-                        ` : `
-                          <button class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-zinc-500 border border-outline-variant/10 active:scale-90 transition-transform" data-action="toggle-set" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}">
-                            <span class="material-symbols-outlined text-base">check</span>
-                          </button>
-                        `}
-                      </div>
-                    </div>
-                  `).join('')}
+                        <div class="col-span-4">
+                          <div class="bg-surface-container-highest rounded-lg p-2 flex items-center ${set.completed ? 'opacity-60' : ''}">
+                            <input class="bg-transparent border-none p-0 w-full text-center font-headline font-bold focus:ring-0 text-on-surface text-sm" type="number" inputmode="numeric" step="1" placeholder="--" value="${set.reps}" data-action="set-reps" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}" ${set.completed ? 'readonly' : ''}/>
+                            <span class="text-[8px] text-zinc-500 font-bold pr-0.5 shrink-0">${label2}</span>
+                          </div>
+                        </div>
+                        <div class="col-span-2 flex justify-end">
+                          ${set.completed ? `
+                            <button class="w-8 h-8 rounded-full ${set.isNewPb ? 'bg-primary shadow-lg shadow-primary/30' : 'bg-primary'} flex items-center justify-center text-on-primary active:scale-90 transition-transform" data-action="toggle-set" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}">
+                              <span class="material-symbols-outlined text-base" style="font-variation-settings:'FILL' 1">check</span>
+                            </button>
+                          ` : `
+                            <button class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-zinc-500 border border-outline-variant/10 active:scale-90 transition-transform" data-action="toggle-set" data-exercise="${sessionEx.exerciseId}" data-set="${sIdx}">
+                              <span class="material-symbols-outlined text-base">check</span>
+                            </button>
+                          `}
+                        </div>
+                      </div>`;
+                  }).join('')}
                   <button class="w-full py-2 rounded-lg border border-dashed border-outline-variant/20 text-zinc-500 text-[10px] font-bold uppercase tracking-widest active:border-primary/50 active:text-primary transition-all" data-action="add-set" data-exercise="${sessionEx.exerciseId}">
                     Add Set
                   </button>
@@ -869,13 +961,25 @@ const Views = {
                 </div>
               </div>
               <div class="space-y-1.5">
-                ${sessionEx.sets.map((set, i) => `
+                ${sessionEx.sets.map((set, i) => {
+                  const exType = ex.type || 'strength';
+                  let setText = '';
+                  if (exType === 'cardio') {
+                    const l1 = ex.inputLabels?.field1?.toLowerCase() || 'mins';
+                    const l2 = ex.inputLabels?.field2?.toLowerCase() || '';
+                    setText = l2 ? `${set.kg}${l1} / ${set.reps}${l2}` : `${set.kg}${l1}`;
+                  } else if (exType === 'bodyweight') {
+                    setText = `${set.reps} reps`;
+                  } else {
+                    setText = `${set.kg > 0 ? set.kg + 'kg' : ''} ${set.kg > 0 ? 'x' : ''} ${set.reps} reps`;
+                  }
+                  return `
                   <div class="flex items-center gap-3 ${set.isNewPb ? 'bg-primary/5 rounded-lg px-2 py-1 border border-primary/10' : ''}">
                     <span class="text-zinc-500 text-xs font-bold w-5">S${i+1}</span>
-                    <span class="font-headline font-bold text-sm">${set.kg > 0 ? set.kg + 'kg' : ''} ${set.kg > 0 ? 'x' : ''} ${set.reps} ${set.kg === 0 ? 'reps' : 'reps'}</span>
+                    <span class="font-headline font-bold text-sm">${setText}</span>
                     ${set.isNewPb ? '<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings:\'FILL\' 1">stars</span>' : ''}
-                  </div>
-                `).join('')}
+                  </div>`;
+                }).join('')}
               </div>
             </div>`;
         }).join('')}
@@ -944,9 +1048,41 @@ const Views = {
     `;
   },
 
+  _renderPBHero(ex) {
+    const exType = ex.type || 'strength';
+    let pbDisplay = '';
+    if (exType === 'cardio') {
+      const l1 = ex.inputLabels?.field1?.toLowerCase() || 'mins';
+      const l2 = ex.inputLabels?.field2?.toLowerCase() || '';
+      pbDisplay = l2
+        ? '<span class="text-5xl font-headline font-black text-white">' + ex.pb.kg + '</span><span class="text-xl font-headline text-zinc-400">' + l1 + '</span><span class="text-2xl text-zinc-600 mx-1">/</span><span class="text-5xl font-headline font-black text-white">' + ex.pb.reps + '</span><span class="text-xl font-headline text-zinc-400">' + l2 + '</span>'
+        : '<span class="text-5xl font-headline font-black text-white">' + ex.pb.kg + '</span><span class="text-xl font-headline text-zinc-400">' + l1 + '</span>';
+    } else if (exType === 'bodyweight') {
+      pbDisplay = '<span class="text-5xl font-headline font-black text-white">' + ex.pb.reps + '</span><span class="text-xl font-headline text-zinc-400">reps</span>';
+    } else {
+      pbDisplay = (ex.pb.kg > 0 ? '<span class="text-5xl font-headline font-black text-white">' + ex.pb.kg + '</span><span class="text-xl font-headline text-zinc-400">kg</span><span class="text-2xl text-zinc-600 mx-1">x</span>' : '') + '<span class="text-5xl font-headline font-black text-white">' + ex.pb.reps + '</span><span class="text-xl font-headline text-zinc-400">reps</span>';
+    }
+    return '<div class="bg-gradient-to-br from-primary/10 to-primary/5 p-6 rounded-2xl border border-primary/20 text-center"><span class="text-[10px] text-primary uppercase tracking-widest font-bold block mb-2">Current Personal Best</span><div class="flex items-baseline justify-center gap-2">' + pbDisplay + '</div><p class="text-xs text-zinc-500 mt-2">' + U.formatDate(ex.pb.date) + '</p></div>';
+  },
+
+  _formatPBText(ex) {
+    if (!ex.pb) return 'No PB';
+    const exType = ex.type || 'strength';
+    if (exType === 'cardio') {
+      const l1 = ex.inputLabels?.field1?.toLowerCase() || 'mins';
+      const l2 = ex.inputLabels?.field2?.toLowerCase() || '';
+      if (!l2) return `${ex.pb.kg}${l1}`;
+      return `${ex.pb.kg}${l1} / ${ex.pb.reps}${l2}`;
+    }
+    if (exType === 'bodyweight') {
+      return `${ex.pb.reps} reps`;
+    }
+    return `${ex.pb.kg > 0 ? ex.pb.kg+'kg x ' : ''}${ex.pb.reps} reps`;
+  },
+
   _renderExerciseList(exercises) {
     return exercises.map(ex => {
-      const pbText = ex.pb ? `${ex.pb.kg > 0 ? ex.pb.kg+'kg x ' : ''}${ex.pb.reps} reps` : 'No PB';
+      const pbText = ex.pb ? this._formatPBText(ex) : 'No PB';
       return `
         <a href="#/library/${ex.id}" class="bg-surface-container-low p-4 rounded-xl flex items-center justify-between active:bg-surface-container-high transition-all block">
           <div class="min-w-0 mr-3">
@@ -982,32 +1118,30 @@ const Views = {
           </div>
         </div>
 
-        ${ex.pb ? `
-          <div class="bg-gradient-to-br from-primary/10 to-primary/5 p-6 rounded-2xl border border-primary/20 text-center">
-            <span class="text-[10px] text-primary uppercase tracking-widest font-bold block mb-2">Current Personal Best</span>
-            <div class="flex items-baseline justify-center gap-2">
-              ${ex.pb.kg > 0 ? `<span class="text-5xl font-headline font-black text-white">${ex.pb.kg}</span><span class="text-xl font-headline text-zinc-400">kg</span><span class="text-2xl text-zinc-600 mx-1">x</span>` : ''}
-              <span class="text-5xl font-headline font-black text-white">${ex.pb.reps}</span>
-              <span class="text-xl font-headline text-zinc-400">reps</span>
-            </div>
-            <p class="text-xs text-zinc-500 mt-2">${U.formatDate(ex.pb.date)}</p>
-          </div>
-        ` : `
-          <div class="bg-surface-container-low p-6 rounded-2xl text-center">
-            <span class="text-zinc-500 font-headline font-bold">No PB recorded yet</span>
-          </div>
-        `}
+        ${ex.pb ? Views._renderPBHero(ex) : '<div class="bg-surface-container-low p-6 rounded-2xl text-center"><span class="text-zinc-500 font-headline font-bold">No PB recorded yet</span></div>'}
 
         ${history.length > 0 ? `
           <div>
             <h3 class="text-zinc-400 font-headline font-bold text-xs tracking-widest uppercase mb-3">PB History</h3>
             <div class="space-y-2">
-              ${history.map((pb, i) => `
+              ${history.map((pb, i) => {
+                const exType = ex.type || 'strength';
+                let pbStr = '';
+                if (exType === 'cardio') {
+                  const l1 = ex.inputLabels?.field1?.toLowerCase() || 'mins';
+                  const l2 = ex.inputLabels?.field2?.toLowerCase() || '';
+                  pbStr = l2 ? `${pb.kg}${l1} / ${pb.reps}${l2}` : `${pb.kg}${l1}`;
+                } else if (exType === 'bodyweight') {
+                  pbStr = `${pb.reps} reps`;
+                } else {
+                  pbStr = `${pb.kg > 0 ? pb.kg+'kg x ' : ''}${pb.reps} reps`;
+                }
+                return `
                 <div class="flex items-center justify-between bg-surface-container-low p-3 rounded-xl ${i === 0 ? 'border border-primary/10' : ''}">
                   <span class="text-xs text-zinc-500">${U.formatDate(pb.date)}</span>
-                  <span class="font-headline font-bold text-sm ${i === 0 ? 'text-primary' : ''}">${pb.kg > 0 ? pb.kg+'kg x ' : ''}${pb.reps} reps</span>
-                </div>
-              `).join('')}
+                  <span class="font-headline font-bold text-sm ${i === 0 ? 'text-primary' : ''}">${pbStr}</span>
+                </div>`;
+              }).join('')}
             </div>
           </div>
         ` : ''}
@@ -1038,7 +1172,7 @@ const Views = {
     const recentPBs = [];
     Store.data.exercises.forEach(ex => {
       ex.pbHistory.forEach(pb => {
-        recentPBs.push({ name: ex.name, ...pb });
+        recentPBs.push({ name: ex.name, exerciseId: ex.id, ...pb });
       });
     });
     recentPBs.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -1094,15 +1228,18 @@ const Views = {
           <div>
             <h3 class="text-zinc-400 font-headline font-bold text-xs tracking-widest uppercase mb-3">Recent PBs</h3>
             <div class="space-y-2">
-              ${recentPBs.slice(0, 10).map(pb => `
+              ${recentPBs.slice(0, 10).map(pb => {
+                const ex = Store.getExercise(pb.exerciseId);
+                const pbStr = ex ? Views._formatPBText(ex) : `${pb.kg > 0 ? pb.kg+'kg x ' : ''}${pb.reps} reps`;
+                return `
                 <div class="flex items-center justify-between bg-surface-container-low p-3 rounded-xl">
                   <div>
                     <span class="font-headline font-bold text-sm">${pb.name}</span>
                     <span class="text-[10px] text-zinc-500 block">${U.formatDate(pb.date)}</span>
                   </div>
-                  <span class="text-primary font-headline font-bold text-sm">${pb.kg > 0 ? pb.kg+'kg x ' : ''}${pb.reps} reps</span>
-                </div>
-              `).join('')}
+                  <span class="text-primary font-headline font-bold text-sm">${pbStr}</span>
+                </div>`;
+              }).join('')}
             </div>
           </div>
         ` : ''}
