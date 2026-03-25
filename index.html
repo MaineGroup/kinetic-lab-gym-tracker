@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
-<title>KINETIC LAB | Workout Tracker</title>
+<title>JERMAINES LAB | Workout Tracker</title>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#0e0e0f"/>
@@ -67,7 +67,7 @@ input[type="number"]{-moz-appearance:textfield}
     <button id="backBtn" class="hidden items-center justify-center w-8 h-8 -ml-1" onclick="history.back()">
       <span class="material-symbols-outlined text-zinc-400">arrow_back</span>
     </button>
-    <h1 id="topTitle" class="text-xl font-black italic tracking-tighter text-green-400 font-headline">KINETIC LAB</h1>
+    <h1 id="topTitle" class="text-xl font-black italic tracking-tighter text-green-400 font-headline">JERMAINES LAB</h1>
   </div>
   <div id="topRight" class="flex items-center gap-3">
     <div class="w-8 h-8 rounded-full overflow-hidden border border-primary/20 bg-surface-container-high">
@@ -646,7 +646,7 @@ const Router = {
     bottomNav.classList.remove('hidden');
     backBtn.classList.add('hidden');
     backBtn.classList.remove('flex');
-    topTitle.textContent = 'KINETIC LAB';
+    topTitle.textContent = "JERMAINES LAB";
     topTitle.className = 'text-xl font-black italic tracking-tighter text-green-400 font-headline';
     topRight.innerHTML = `<div class="w-8 h-8 rounded-full overflow-hidden border border-primary/20 bg-surface-container-high"><img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUE3_TaKU9exBljpyyNvuLlwlSoLuJOapXd7HfhLK3XFv9fAQX2E2zgcuirhdfowX0u6p7LYjveqgBzIWRODrVFSY3n7dT9qPdK6hIud0kjAEG-1cfU9arxviZtENpZdUhU7aaVTZ3AfOZBNwxM3IwdDWJVHvhjU4XhTvbGsMq0s5QaNHIk3Lo8UrR3Uk329Ee3zL0mgwMpSymqf0j7Lf_9hQsmY1weL_MKeQV5e_VsqrduBsUvBQAug8bgaEz8AMdssNgs1x8HA4" alt=""/></div>`;
 
@@ -1924,7 +1924,7 @@ document.addEventListener('click', (e) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'kinetic-lab-backup-' + new Date().toISOString().slice(0,10) + '.json';
+    a.download = 'jermaines-lab-backup-' + new Date().toISOString().slice(0,10) + '.json';
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -2109,7 +2109,7 @@ document.addEventListener('change', (e) => {
           Store.save();
           showModal('<h3 class="text-lg font-headline font-bold mb-3 text-primary">Import Successful</h3><p class="text-sm text-zinc-400 mb-4">' + imported.sessions.length + ' sessions and ' + imported.exercises.length + ' exercises restored.</p><button class="w-full py-3 bg-primary/20 text-primary rounded-xl font-headline font-bold text-sm" data-action="close-modal-reload">OK</button>');
         } else {
-          showModal('<h3 class="text-lg font-headline font-bold mb-3 text-error">Invalid File</h3><p class="text-sm text-zinc-400 mb-4">This doesn\'t look like a Kinetic Lab backup file.</p><button class="w-full py-3 bg-surface-container-highest rounded-xl font-headline font-bold text-sm" data-action="close-modal">OK</button>');
+          showModal('<h3 class="text-lg font-headline font-bold mb-3 text-error">Invalid File</h3><p class="text-sm text-zinc-400 mb-4">This doesn\'t look like a Jermaines Lab backup file.</p><button class="w-full py-3 bg-surface-container-highest rounded-xl font-headline font-bold text-sm" data-action="close-modal">OK</button>');
         }
       } catch(err) {
         showModal('<h3 class="text-lg font-headline font-bold mb-3 text-error">Import Failed</h3><p class="text-sm text-zinc-400 mb-4">Could not read the file. Make sure it\'s a valid JSON backup.</p><button class="w-full py-3 bg-surface-container-highest rounded-xl font-headline font-bold text-sm" data-action="close-modal">OK</button>');
