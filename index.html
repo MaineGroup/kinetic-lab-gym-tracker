@@ -10,6 +10,7 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
 tailwind.config = {
   darkMode: "class",
@@ -108,6 +109,24 @@ input[type="number"]{-moz-appearance:textfield}
 // DATA LAYER
 // ============================================================
 const STORAGE_KEY = 'kineticLabData';
+
+// Image library for exercises and categories
+const IMG = {
+  chest: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCnfeIDLxH3eatyUlU9FZgncwifhXJlZvmsC-wvAdtoh7uTzPQE0UXd5K8gKLhdgu385aKsXgZnXJ1yKDeYOz0hML6JXhmhTvCaj6Fsv4j8R_CSp3HlJA-TdgH2MSXOHAG96KC44qrTCYDss3x9TqIfz8VID9veqTgr2jr3Pu-uffds3pRdnFRzSkxiPCtYmjvJqPOBTXgkxnoU9SG5fgxH7hVOnD47on3IGs4mj3mgXai3Jb_wv_coskBxSbTKDAIB01v0X4Uxegc',
+  shoulders: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDinqM8PVUs94t98r6GBzMOmCOOEz_5OJO4mkT57hMcJriQDffPDrO2Z4JtKV-L1VoROpYlSi1p1zxndaUC2UCJF04XDWEs2ijpxUDcLNAWf7kCW5dPGFI1kR6I5NvfcqxBNrdo7wY4cvXHm-nJDRFIc_U2RXSnd5MzEzt4UfL0A5hnkygBpheg-AMMY1MF3mV92VKASlQpKUaLoI24wiqs-VwFNU5XaNm4uNGRuNt3VpV5vr5HshRktuFiDEcNDJBqpDZy94UafXk',
+  legs: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAQ5iBUO5PbDvj_AAKQDAnCV9gBmXRv7xfmuQD3tfWHP4UWaLrPV6QLkWTWiEvnL_teBy3bQaJb9SqZuOZPsOvxfzIxmf27z6DNsgi_GvXvdLBRSeLJEG9ES3t97oHXEaL0K9vS0J0FAP3iqnKBubraYBKgprQpzfedflyrUe5rDsx-kFfM1Vldq761xRiQtysPLBWQPmB5scsJ853KXy75U14SsZPqAbe6MuvN_xg35R6hDSHk_bR-EAv1R4IfyiSjy7Q154ThP7k',
+  arms: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCv7Rhoqrym5i_tRWe1V75vmCuZOY_hsk7RQwLmGaIKbEofPonvQqOu-mkzmg0-jP-GLCZez6CwKAmtroN9ZPDln7IK7o9FkRNjUumVbby93zMD6vCkrrMdho-mtBwXdHTek3rJMMlYEVaWCjhCWV_GhSsSyWkJc8DiXLnI6Hhgb9niUwlwXTF2NwIRS-0krXr13cOpK2k41ZOuRkkRlSM2EXhcMDJO8sNofomdPjcK3WOmldxsubL9WOOwwDVYN6kqfugK9goPwgc',
+  back: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAlJyH0jdL-FFwRQ-OSoa1_GAR6SEyEBCgwMDFCK35LvTh-dhxui0jPPCoZa7Q9M5K914Z2304udMsqx-IJKopFwrvYFzuguCxpWTGzqCpfW9C98YjhASbz70sJhQeptQsmwlXVyoTrs-q0qGigVrh3g3CZMFJ02MyAlAsKM7BrIDYhjA4pLRPxE3vTqYZd30XbEDJcn2jYduwdxKhWT0_lNdjoJ0XAYsuxJ9KJWHJSovw5quMRyS_0M4YNXWt6TfjkAZk5vO-UrGk',
+  cardio: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAJppBiCNCv11TJcO_hOMS26TWKiar89eGiuWAC9b1senPlQldD_1KmivUOa6xzyhSNueqYEowdKH0tNv6EpX1QHCr55sLM22zYnB_97_05CFCeDerw23uh4GCxAypIlM3H1c4hQGbHP4828Kt7wm6TGgGxxhaPk-_GZaIdCyn9Wp657xlSE4ByBap4jQlDtZe7x9ptk-_vAHZbaWscJYziPJhcHE4Bhmz9Sxz0TVu_laFssu19X2v40VOiHoPor17Tg_QxS3H2sk8',
+  abs: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD6iMyQcaWWGDSiD-4pNvnpMGY2p4JBrodacBNd-5RgsLvae_H-VkOHaecFnl1MnjHn6DSYT-Md_XH8ZHfFPPOH_CYD_bZKulCGTF8VENbV9cWvC1-Q0IPEAwM8QpuLNmO7N18Uj6wmYMZpLMfHgWhmPQRQ60heh7oFdFzFTfNSz-AD_iB3Jvh7ElYwjUqoTquUelodHK6pTc8Z7XvmDxvjF24hRhqfwUboX3RiWxIMcHvX0QBmRmjb-OA7-Ko-aY4mnBIpHDeis7s',
+  gym: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCtX_2G3YlWS52icKXt0iTONpb1qpD_2GIBCJmcthP6Fg9NcOsgBNnpjgm4eYi1BoWEolwLcBHcMay-5tUA0XZslK-c2u94ISulJWJZod9MXTw5qLCCUs7CsNt9oP4-HVPw7Xw-GBTpWZtrELAuK3-jhzWUe-WwCRX_9l5g3i94Ec5d1z4j0vfcuHT_hbla6bz_-kmy0Sf3nFsMjIodPmS2r-7hUK_U1ZatcUANybAYxVakEMe33C3_yTiQeUVWc6AfWeFkdfCRdQg',
+  gymFooter: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDPXYYdvRDteOQVFpYNmqM33WVOGLk1YPnIqt00w0z4BBJQsZ8b_oerLA_642eBWOs4NprLhdo6Fkh_RiE44nSrclP5TYSZs7QdQWw64vFv2omL9BBOy97YU5sRkg_S53mUWqCad7wSOIrlt20-PKOVUxbgDYw7HKKlVqnnz_dnAF0YFovqnxv2tW45R_mQSYXzjbh_aqow5g-3XXza0_QJCFvhRtAsQpfd2aIpN5pQe2UuBLUDdV59x7PYUTvdrqJcr9SseGlGrhk',
+  barbell: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDI2o8OU1awfdYbUCdmHpxF9IXURXvMHT7clhHmWJfZxnFBDv76bdcjwEY3z0G5901SwjtGVxCLVAzfW6ZMUZ-5qqW8PyDyd5sMIILAZBWXHnAMLEAQur2xXpv3jYT0eXLGH7Ej-ShPuOFsmaA6fuaiOfB_ajhtmFW3nz7VA3qz94cg6EjFI_uWQW78LEAuTtPeusAME5UZDmqCXvbX-zXoQ8rs_ffw6CU0_XxHWuBreBAZ9FiO2o-fViqtJ6onsyjOWPt7VFnpYr0',
+  custom: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCKKUsN7vftGLnBDiwQoexM3JUesHFpr1Z_Md3yjhsnxcqgRlDiWBlNp-yxaHDcPq0-URRlJ4NR22pLhhL21CmHFr6xenVgu6c7zpFBQS4xCM9ssgXhG1X3SkuIqW0GsxQwGt6h1iSdOg85ZLHyRVmzMdPFZJcEiNFiAvpPwPkopG_7qll--y07ke1KMsboIp0wvYASBb1oom6ofqG7Cxg9vEb6FnmD9JwdeHHGC2lqKArkk4uEfrAgLGk4btEAWWRLEKTJjNIs45g',
+  getForExercise(ex) {
+    return this[ex.category] || this.custom;
+  }
+};
 
 const Store = {
   data: null,
@@ -351,11 +370,12 @@ const SessionManager = {
     session.totalVolume = vol;
   },
 
-  finishSession() {
+  finishSession(calories) {
     const session = this.getActive();
     if (!session) return null;
     session.duration = Math.floor((Date.now() - session.startTime) / 1000);
     session.date = new Date(session.startTime).toISOString();
+    session.calories = calories || 0;
     this.recalcVolume();
     // Clean up incomplete sets
     session.exercises.forEach(ex => {
@@ -464,6 +484,30 @@ const U = {
   },
   getWeekVolume() {
     return this.getWeekSessions().reduce((sum, s) => sum + (s.totalVolume || 0), 0);
+  },
+  getWeekCalories() {
+    return this.getWeekSessions().reduce((sum, s) => sum + (s.calories || 0), 0);
+  },
+  getTotalCalories() {
+    return Store.data.sessions.reduce((sum, s) => sum + (s.calories || 0), 0);
+  },
+  getLast7DaysVolume() {
+    const days = [];
+    const labels = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      d.setHours(0,0,0,0);
+      const nextD = new Date(d);
+      nextD.setDate(nextD.getDate() + 1);
+      const dayVol = Store.data.sessions.filter(s => {
+        const sd = new Date(s.date);
+        return sd >= d && sd < nextD;
+      }).reduce((sum, s) => sum + (s.totalVolume || 0), 0);
+      days.push(dayVol);
+      labels.push(d.toLocaleDateString('en-GB', {weekday:'short'}));
+    }
+    return { labels, data: days };
   }
 };
 
@@ -544,6 +588,10 @@ const Router = {
     app.innerHTML = `<div class="view-enter">${html}</div>`;
     this.updateNav(activeTab);
     this.bindEvents();
+    // Render charts if on stats page
+    if (activeTab === 'stats' && typeof Chart !== 'undefined') {
+      this.renderCharts();
+    }
   },
 
   updateNav(activeTab) {
@@ -557,6 +605,66 @@ const Router = {
         tab.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 0";
       }
     });
+  },
+
+  renderCharts() {
+    // Volume trend line chart
+    const volEl = document.getElementById('volumeChart');
+    if (volEl) {
+      const volData = U.getLast7DaysVolume();
+      new Chart(volEl, {
+        type: 'line',
+        data: {
+          labels: volData.labels,
+          datasets: [{
+            data: volData.data,
+            borderColor: '#9cff93',
+            backgroundColor: 'rgba(156,255,147,0.1)',
+            fill: true,
+            tension: 0.4,
+            borderWidth: 2,
+            pointBackgroundColor: '#9cff93',
+            pointRadius: 3,
+            pointHoverRadius: 5
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#767576', font: { size: 10, family: 'Manrope' } } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#767576', font: { size: 10, family: 'Manrope' }, callback: v => v >= 1000 ? (v/1000)+'k' : v } }
+          }
+        }
+      });
+    }
+    // Distribution doughnut chart
+    const distEl = document.getElementById('distChart');
+    if (distEl) {
+      const distribution = {};
+      const colorMap = {primary:'#9cff93',secondary:'#00e3fd',tertiary:'#a68cff',error:'#ff7351'};
+      Store.data.sessions.forEach(s => {
+        const day = Store.getWorkoutDay(s.workoutDayId);
+        const name = day?.name || 'Other';
+        distribution[name] = (distribution[name] || 0) + 1;
+        if (!distribution['_color_'+name]) distribution['_color_'+name] = colorMap[day?.color] || '#9cff93';
+      });
+      const labels = Object.keys(distribution).filter(k => !k.startsWith('_color_'));
+      const data = labels.map(l => distribution[l]);
+      const colors = labels.map(l => distribution['_color_'+l]);
+      new Chart(distEl, {
+        type: 'doughnut',
+        data: {
+          labels,
+          datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 4 }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          cutout: '65%',
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
   },
 
   bindEvents() {
@@ -578,6 +686,7 @@ const Views = {
     const weekVol = U.getWeekVolume();
     const totalSessions = Store.data.sessions.length;
     const monthPBs = U.getMonthPBs();
+    const weekCals = U.getWeekCalories();
     const recent = Store.data.sessions.slice(0, 3);
     const activeSession = SessionManager.getActive();
 
@@ -628,9 +737,9 @@ const Views = {
             <p class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">Week Volume</p>
           </div>
           <div class="bg-surface-container-low p-5 rounded-2xl border border-outline-variant/5">
-            <span class="material-symbols-outlined text-tertiary mb-2 text-xl">calendar_month</span>
-            <p class="text-2xl font-headline font-black">${totalSessions}</p>
-            <p class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">Total Sessions</p>
+            <span class="material-symbols-outlined text-tertiary mb-2 text-xl">local_fire_department</span>
+            <p class="text-2xl font-headline font-black">${U.formatVolume(weekCals)}</p>
+            <p class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">Week Calories</p>
           </div>
           <div class="bg-surface-container-low p-5 rounded-2xl border border-outline-variant/5">
             <span class="material-symbols-outlined text-primary mb-2 text-xl">emoji_events</span>
@@ -696,11 +805,11 @@ const Views = {
             const colorMap = { primary:'from-primary/20 to-primary/5 border-primary/20', secondary:'from-secondary/20 to-secondary/5 border-secondary/20', tertiary:'from-tertiary/20 to-tertiary/5 border-tertiary/20', error:'from-error/20 to-error/5 border-error/20' };
             const bgClass = colorMap[day.color] || colorMap.primary;
             return `
-              <div class="bg-gradient-to-r ${bgClass} rounded-2xl border overflow-hidden">
+              <div class="bg-gradient-to-r ${bgClass} rounded-2xl border overflow-hidden relative">
                 <a href="#/train/${day.id}" class="p-5 flex items-center justify-between active:opacity-80 transition-opacity block" data-action="start-day" data-day="${day.id}">
                   <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-xl bg-surface-container-lowest/50 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-${day.color} text-2xl">${day.icon}</span>
+                    <div class="w-14 h-14 rounded-xl overflow-hidden shrink-0">
+                      <img class="w-full h-full object-cover" src="${IMG[day.id === 'cardio-abs' ? 'cardio' : day.id === 'shoulders-triceps' ? 'shoulders' : day.id] || IMG.gym}" alt=""/>
                     </div>
                     <div>
                       <h3 class="text-xl font-headline font-bold">${day.name}</h3>
@@ -896,6 +1005,10 @@ const Views = {
                   </button>
                 </div>
               </div>
+              <div class="h-16 relative overflow-hidden">
+                <img class="w-full h-full object-cover opacity-20 grayscale" src="${IMG.getForExercise(ex)}" alt=""/>
+                <div class="absolute inset-0 bg-gradient-to-t from-surface-container-low to-transparent"></div>
+              </div>
             </div>`;
         }).join('')}
       </section>
@@ -944,6 +1057,7 @@ const Views = {
             <span class="text-zinc-400 font-label text-xs uppercase tracking-widest mb-1 block">PBs</span>
             <span class="text-2xl font-headline font-bold ${session.pbsAchieved > 0 ? 'text-primary' : 'text-white'}">${session.pbsAchieved}</span>
           </div>
+          ${session.calories ? '<div class="glass p-4 rounded-xl border border-outline-variant/10 col-span-2"><span class="text-zinc-400 font-label text-xs uppercase tracking-widest mb-1 block">Calories Burned</span><span class="text-2xl font-headline font-bold text-error">' + session.calories + '<span class="text-sm text-zinc-500 ml-1">kcal</span></span></div>' : ''}
         </div>
       </section>
 
@@ -1015,7 +1129,8 @@ const Views = {
               </div>
               <div class="text-right">
                 <p class="text-sm font-headline font-black ${s.pbsAchieved > 0 ? 'text-primary' : ''}">${U.formatVolume(s.totalVolume)} KG</p>
-                ${s.pbsAchieved > 0 ? `<p class="text-[8px] text-primary uppercase tracking-widest font-bold">${s.pbsAchieved} PB</p>` : ''}
+                ${s.calories ? '<p class="text-[8px] text-error uppercase tracking-widest font-bold">' + s.calories + ' kcal</p>' : ''}
+                ${s.pbsAchieved > 0 ? '<p class="text-[8px] text-primary uppercase tracking-widest font-bold">' + s.pbsAchieved + ' PB</p>' : ''}
               </div>
             </a>`;
         }).join('')}
@@ -1083,16 +1198,23 @@ const Views = {
   _renderExerciseList(exercises) {
     return exercises.map(ex => {
       const pbText = ex.pb ? this._formatPBText(ex) : 'No PB';
+      const img = IMG.getForExercise(ex);
       return `
-        <a href="#/library/${ex.id}" class="bg-surface-container-low p-4 rounded-xl flex items-center justify-between active:bg-surface-container-high transition-all block">
-          <div class="min-w-0 mr-3">
-            <h4 class="font-headline font-bold text-sm truncate">${ex.name}</h4>
-            <div class="flex items-center gap-2 mt-0.5">
-              ${ex.muscleGroups.slice(0,2).map(mg => `<span class="text-[9px] text-zinc-500 uppercase tracking-wider">${mg}</span>`).join('<span class="text-zinc-700">&middot;</span>')}
-            </div>
+        <a href="#/library/${ex.id}" class="glass rounded-2xl overflow-hidden flex gap-3 p-3 active:bg-surface-container-high/60 transition-all block group">
+          <div class="w-20 h-20 rounded-xl overflow-hidden bg-surface-container-lowest shrink-0">
+            <img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src="${img}" alt="${ex.name}"/>
           </div>
-          <div class="text-right shrink-0">
-            <p class="text-xs font-headline font-bold ${ex.pb ? 'text-primary' : 'text-zinc-600'}">${pbText}</p>
+          <div class="flex flex-col justify-between py-0.5 min-w-0 flex-1">
+            <div>
+              <span class="font-label text-[9px] font-extrabold uppercase tracking-[0.15em] text-secondary">${ex.muscleGroups[0] || ''}</span>
+              <h4 class="font-headline font-bold text-sm truncate group-hover:text-primary transition-colors">${ex.name}</h4>
+            </div>
+            <div class="flex gap-4 items-center">
+              <div class="flex flex-col">
+                <span class="text-[8px] uppercase font-bold text-on-surface-variant tracking-widest">Record</span>
+                <span class="text-xs font-bold ${ex.pb ? 'text-primary' : 'text-zinc-600'}">${pbText}</span>
+              </div>
+            </div>
           </div>
         </a>`;
     }).join('');
@@ -1158,14 +1280,17 @@ const Views = {
     const sessions = Store.data.sessions;
     const totalVol = sessions.reduce((sum, s) => sum + (s.totalVolume || 0), 0);
     const totalPBs = Store.data.exercises.reduce((sum, ex) => sum + ex.pbHistory.length, 0);
+    const totalCals = U.getTotalCalories();
     const avgDuration = sessions.length ? Math.round(sessions.reduce((sum, s) => sum + (s.duration || 0), 0) / sessions.length) : 0;
 
     // Workout distribution
     const distribution = {};
+    const distColors = {};
     sessions.forEach(s => {
       const day = Store.getWorkoutDay(s.workoutDayId);
       const name = day?.name || 'Other';
       distribution[name] = (distribution[name] || 0) + 1;
+      if (!distColors[name]) distColors[name] = day?.color || 'primary';
     });
 
     // Recent PBs
@@ -1179,6 +1304,7 @@ const Views = {
 
     return `
       <section class="space-y-6">
+        <!-- Stats Grid -->
         <div class="grid grid-cols-2 gap-3">
           <div class="bg-surface-container-low p-5 rounded-2xl border border-outline-variant/5">
             <span class="material-symbols-outlined text-primary mb-2 text-xl">fitness_center</span>
@@ -1191,60 +1317,72 @@ const Views = {
             <p class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">Total Sessions</p>
           </div>
           <div class="bg-surface-container-low p-5 rounded-2xl border border-outline-variant/5">
+            <span class="material-symbols-outlined text-error mb-2 text-xl">local_fire_department</span>
+            <p class="text-2xl font-headline font-black">${U.formatVolume(totalCals)}</p>
+            <p class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">Total Calories</p>
+          </div>
+          <div class="bg-surface-container-low p-5 rounded-2xl border border-outline-variant/5">
             <span class="material-symbols-outlined text-tertiary mb-2 text-xl">timer</span>
             <p class="text-2xl font-headline font-black">${Math.floor(avgDuration/60)}<span class="text-sm text-zinc-500">m</span></p>
             <p class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">Avg Duration</p>
           </div>
-          <div class="bg-surface-container-low p-5 rounded-2xl border border-outline-variant/5">
-            <span class="material-symbols-outlined text-primary mb-2 text-xl">emoji_events</span>
-            <p class="text-2xl font-headline font-black">${totalPBs}</p>
-            <p class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">Total PBs</p>
-          </div>
         </div>
 
+        <!-- Volume Trend Chart -->
+        <div class="glass rounded-2xl p-5 border border-outline-variant/10">
+          <h3 class="text-zinc-400 font-headline font-bold text-xs tracking-widest uppercase mb-4">7-Day Volume Trend</h3>
+          <div style="height:180px"><canvas id="volumeChart"></canvas></div>
+        </div>
+
+        <!-- Workout Distribution Chart -->
         ${Object.keys(distribution).length > 0 ? `
-          <div>
-            <h3 class="text-zinc-400 font-headline font-bold text-xs tracking-widest uppercase mb-3">Workout Distribution</h3>
-            <div class="space-y-3">
-              ${Object.entries(distribution).map(([name, count]) => {
-                const maxCount = Math.max(...Object.values(distribution));
-                const pct = Math.round((count/maxCount)*100);
-                return `
-                  <div>
-                    <div class="flex justify-between text-sm mb-1">
-                      <span class="font-headline font-bold text-xs uppercase tracking-wider">${name}</span>
-                      <span class="text-zinc-400 text-xs">${count} sessions</span>
-                    </div>
-                    <div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
-                      <div class="h-full bg-primary rounded-full" style="width:${pct}%"></div>
-                    </div>
-                  </div>`;
-              }).join('')}
+          <div class="glass rounded-2xl p-5 border border-outline-variant/10">
+            <h3 class="text-zinc-400 font-headline font-bold text-xs tracking-widest uppercase mb-4">Workout Distribution</h3>
+            <div class="flex items-center gap-6">
+              <div style="width:140px;height:140px" class="shrink-0"><canvas id="distChart"></canvas></div>
+              <div class="space-y-2 flex-1">
+                ${Object.entries(distribution).map(([name, count]) => {
+                  const colorMap = {primary:'#9cff93',secondary:'#00e3fd',tertiary:'#a68cff',error:'#ff7351'};
+                  const c = colorMap[distColors[name]] || '#9cff93';
+                  return '<div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-full shrink-0" style="background:'+c+'"></div><span class="text-xs font-bold flex-1">'+name+'</span><span class="text-xs text-zinc-400">'+count+'</span></div>';
+                }).join('')}
+              </div>
             </div>
           </div>
         ` : ''}
+
+        <!-- PBs -->
+        <div class="bg-surface-container-low p-5 rounded-2xl border border-outline-variant/5 text-center">
+          <span class="material-symbols-outlined text-primary mb-2 text-3xl">emoji_events</span>
+          <p class="text-3xl font-headline font-black">${totalPBs}</p>
+          <p class="text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">Total Personal Bests</p>
+        </div>
 
         ${recentPBs.length > 0 ? `
           <div>
             <h3 class="text-zinc-400 font-headline font-bold text-xs tracking-widest uppercase mb-3">Recent PBs</h3>
             <div class="space-y-2">
-              ${recentPBs.slice(0, 10).map(pb => {
+              ${recentPBs.slice(0, 8).map(pb => {
                 const ex = Store.getExercise(pb.exerciseId);
-                const pbStr = ex ? Views._formatPBText(ex) : `${pb.kg > 0 ? pb.kg+'kg x ' : ''}${pb.reps} reps`;
-                return `
-                <div class="flex items-center justify-between bg-surface-container-low p-3 rounded-xl">
-                  <div>
-                    <span class="font-headline font-bold text-sm">${pb.name}</span>
-                    <span class="text-[10px] text-zinc-500 block">${U.formatDate(pb.date)}</span>
-                  </div>
-                  <span class="text-primary font-headline font-bold text-sm">${pbStr}</span>
-                </div>`;
+                const pbStr = ex ? Views._formatPBText(ex) : (pb.kg > 0 ? pb.kg+'kg x ' : '') + pb.reps + ' reps';
+                const img = ex ? IMG.getForExercise(ex) : IMG.custom;
+                return '<a href="#/library/'+pb.exerciseId+'" class="flex items-center gap-3 bg-surface-container-low p-3 rounded-xl active:bg-surface-container-high transition-all block"><div class="w-10 h-10 rounded-lg overflow-hidden shrink-0"><img class="w-full h-full object-cover" src="'+img+'"/></div><div class="flex-1 min-w-0"><span class="font-headline font-bold text-sm truncate block">'+pb.name+'</span><span class="text-[10px] text-zinc-500">'+U.formatDate(pb.date)+'</span></div><span class="text-primary font-headline font-bold text-sm shrink-0">'+pbStr+'</span></a>';
               }).join('')}
             </div>
           </div>
         ` : ''}
+
+        <!-- Footer Image -->
+        <div class="rounded-3xl overflow-hidden h-32 relative">
+          <img class="w-full h-full object-cover opacity-50" src="${IMG.gymFooter}" alt=""/>
+          <div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+          <div class="absolute bottom-4 left-5">
+            <p class="text-primary font-headline font-black italic text-xl tracking-tighter">EVOLVE FASTER</p>
+          </div>
+        </div>
       </section>
     `;
+    // Charts are rendered after DOM insert via _renderCharts
   },
 
   // ---- EDIT WORKOUT DAY ----
@@ -1395,7 +1533,21 @@ document.addEventListener('click', (e) => {
   }
 
   if (action === 'finish-workout') {
-    const session = SessionManager.finishSession();
+    const session = SessionManager.getActive();
+    if (!session) return;
+    const completedSets = U.getCompletedSets(session);
+    if (completedSets === 0) {
+      showModal('<h3 class="text-lg font-headline font-bold mb-3">No sets logged</h3><p class="text-sm text-zinc-400 mb-4">Complete at least one set before finishing.</p><button class="w-full py-3 bg-surface-container-highest rounded-xl font-headline font-bold text-sm" data-action="close-modal">OK</button>');
+      return;
+    }
+    showModal('<h3 class="text-lg font-headline font-bold mb-2">Finish Workout</h3><p class="text-sm text-zinc-400 mb-4">Add calories burned (optional)</p><div class="bg-surface-container-highest rounded-xl p-3 flex items-center mb-5"><input id="caloriesInput" type="number" inputmode="numeric" placeholder="e.g. 450" class="bg-transparent border-none p-0 w-full text-center font-headline font-bold focus:ring-0 text-on-surface text-lg"/><span class="text-xs text-zinc-500 font-bold shrink-0">KCAL</span></div><div class="flex gap-3"><button class="flex-1 py-3 bg-surface-container-highest rounded-xl font-headline font-bold text-sm" data-action="close-modal">Cancel</button><button class="flex-1 py-3 bg-gradient-to-r from-primary to-primary-container text-surface-container-lowest rounded-xl font-headline font-bold text-sm" data-action="confirm-finish">Save</button></div>');
+    setTimeout(() => document.getElementById('caloriesInput')?.focus(), 100);
+  }
+
+  if (action === 'confirm-finish') {
+    const cal = parseInt(document.getElementById('caloriesInput')?.value) || 0;
+    const session = SessionManager.finishSession(cal);
+    closeModal();
     if (session) {
       location.hash = '#/history/' + session.id;
     }
