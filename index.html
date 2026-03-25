@@ -148,45 +148,68 @@ const Store = {
   seedData() {
     const exercises = [
       // CHEST
-      {id:'standing-chest-press',name:'Standing Chest Press Machine',category:'chest',muscleGroups:['Chest'],pb:{kg:95,reps:9,date:'2026-03-20'},pbHistory:[{kg:95,reps:9,date:'2026-03-20'}]},
-      {id:'bench-press',name:'Bench Press',category:'chest',muscleGroups:['Chest'],pb:{kg:100,reps:5,date:'2026-03-20'},pbHistory:[{kg:100,reps:5,date:'2026-03-20'}]},
-      {id:'incline-bench-press',name:'Incline Bench Press',category:'chest',muscleGroups:['Chest'],pb:{kg:60,reps:7,date:'2026-03-20'},pbHistory:[{kg:60,reps:7,date:'2026-03-20'}]},
-      {id:'incline-dumbbells',name:'Incline Dumbbells',category:'chest',muscleGroups:['Chest'],pb:{kg:34,reps:4,date:'2026-03-20'},pbHistory:[{kg:34,reps:4,date:'2026-03-20'}]},
-      {id:'flat-bench-dumbbells',name:'Flat Bench Dumbbells',category:'chest',muscleGroups:['Chest'],pb:{kg:36,reps:8,date:'2026-03-20'},pbHistory:[{kg:36,reps:8,date:'2026-03-20'}]},
-      {id:'pec-fly-machine',name:'Pec Fly Machine',category:'chest',muscleGroups:['Chest'],pb:{kg:82,reps:10,date:'2026-03-20'},pbHistory:[{kg:82,reps:10,date:'2026-03-20'}]},
+      {id:'standing-chest-press',name:'Standing Chest Press Machine',category:'chest',muscleGroups:['Chest'],pb:null,pbHistory:[]},
+      {id:'bench-press',name:'Bench Press',category:'chest',muscleGroups:['Chest'],pb:null,pbHistory:[]},
+      {id:'incline-bench-press',name:'Incline Bench Press',category:'chest',muscleGroups:['Chest'],pb:null,pbHistory:[]},
+      {id:'incline-dumbbells',name:'Incline Dumbbells',category:'chest',muscleGroups:['Chest'],pb:null,pbHistory:[]},
+      {id:'flat-bench-dumbbells',name:'Flat Bench Dumbbells',category:'chest',muscleGroups:['Chest'],pb:null,pbHistory:[]},
+      {id:'pec-fly-machine',name:'Pec Fly Machine',category:'chest',muscleGroups:['Chest'],pb:null,pbHistory:[]},
 
-      // SHARED (Chest + Shoulders/Triceps)
-      {id:'skull-crushers',name:'Skull Crushers',category:'arms',muscleGroups:['Triceps'],pb:{kg:30,reps:10,date:'2026-03-20'},pbHistory:[{kg:30,reps:10,date:'2026-03-20'}]},
-      {id:'triceps-extension-machine',name:'Triceps Extension Machine',category:'arms',muscleGroups:['Triceps'],pb:{kg:27,reps:9,date:'2026-03-20'},pbHistory:[{kg:27,reps:9,date:'2026-03-20'}]},
-      {id:'bar-pull-down',name:'Bar Pull Down',category:'arms',muscleGroups:['Triceps'],pb:{kg:82,reps:10,date:'2026-03-20'},pbHistory:[{kg:82,reps:10,date:'2026-03-20'}]},
-      {id:'dips',name:'Dips',category:'arms',muscleGroups:['Triceps','Chest'],pb:{kg:0,reps:40,date:'2026-03-20'},pbHistory:[{kg:0,reps:40,date:'2026-03-20'}]},
+      // ARMS (shared across days)
+      {id:'skull-crushers',name:'Skull Crushers',category:'arms',muscleGroups:['Triceps'],pb:null,pbHistory:[]},
+      {id:'triceps-extension-machine',name:'Triceps Extension Machine',category:'arms',muscleGroups:['Triceps'],pb:null,pbHistory:[]},
+      {id:'bar-pull-down',name:'Bar Pull Down',category:'arms',muscleGroups:['Triceps'],pb:null,pbHistory:[]},
+      {id:'dips',name:'Dips',category:'arms',muscleGroups:['Triceps','Chest'],pb:null,pbHistory:[]},
+      {id:'rope-pulldown',name:'Rope Pulldown',category:'arms',muscleGroups:['Triceps'],pb:null,pbHistory:[]},
+      {id:'tricep-extension-single-arm',name:'Tricep Extension Single Arm',category:'arms',muscleGroups:['Triceps'],pb:null,pbHistory:[]},
 
-      // SHOULDERS/TRICEPS
-      {id:'shoulder-press-dumbbells',name:'Shoulder Press Dumbbells',category:'shoulders',muscleGroups:['Shoulders'],pb:{kg:28,reps:6,date:'2026-03-15'},pbHistory:[{kg:28,reps:6,date:'2026-03-15'}]},
-      {id:'straight-bar-arm-raise',name:'Straight Bar Arm Raise',category:'shoulders',muscleGroups:['Front Delts'],pb:{kg:30,reps:10,date:'2026-03-15'},pbHistory:[{kg:30,reps:10,date:'2026-03-15'}]},
-      {id:'shoulder-shrugs',name:'Shoulder Shrugs',category:'shoulders',muscleGroups:['Traps'],pb:{kg:42,reps:8,date:'2026-03-15'},pbHistory:[{kg:42,reps:8,date:'2026-03-15'}]},
-      {id:'shoulder-press-machine',name:'Shoulder Press Machine',category:'shoulders',muscleGroups:['Shoulders'],pb:{kg:68,reps:10,date:'2026-03-15'},pbHistory:[{kg:68,reps:10,date:'2026-03-15'}]},
-      {id:'single-arm-raises-machine',name:'Single Arm Raises on Machine',category:'shoulders',muscleGroups:['Shoulders'],pb:{kg:23,reps:10,date:'2026-03-15'},pbHistory:[{kg:23,reps:10,date:'2026-03-15'}]},
-      {id:'shoulder-lift-bar',name:'Shoulder Lift with Bar',category:'shoulders',muscleGroups:['Shoulders'],pb:{kg:30,reps:10,date:'2026-03-15'},pbHistory:[{kg:30,reps:10,date:'2026-03-15'}]},
+      // SHOULDERS
+      {id:'shoulder-press-dumbbells',name:'Shoulder Press Dumbbells',category:'shoulders',muscleGroups:['Shoulders'],pb:null,pbHistory:[]},
+      {id:'straight-bar-arm-raise',name:'Straight Bar Arm Raise',category:'shoulders',muscleGroups:['Front Delts'],pb:null,pbHistory:[]},
+      {id:'shoulder-shrugs',name:'Shoulder Shrugs',category:'shoulders',muscleGroups:['Traps'],pb:null,pbHistory:[]},
+      {id:'shoulder-press-machine',name:'Shoulder Press Machine',category:'shoulders',muscleGroups:['Shoulders'],pb:null,pbHistory:[]},
+      {id:'single-arm-raises-machine',name:'Single Arm Raises on Machine',category:'shoulders',muscleGroups:['Shoulders'],pb:null,pbHistory:[]},
+      {id:'shoulder-lift-bar',name:'Shoulder Lift with Bar',category:'shoulders',muscleGroups:['Shoulders'],pb:null,pbHistory:[]},
+      {id:'shoulder-bench-press',name:'Shoulder Bench Press',category:'shoulders',muscleGroups:['Shoulders'],pb:null,pbHistory:[]},
+      {id:'dumbbell-arm-air-raise',name:'Dumbbell Arm Air Raise',category:'shoulders',muscleGroups:['Shoulders'],pb:null,pbHistory:[]},
 
       // LEGS
-      {id:'leg-extension',name:'Leg Extension',category:'legs',muscleGroups:['Quads'],pb:{kg:109,reps:6,date:'2026-03-23'},pbHistory:[{kg:109,reps:6,date:'2026-03-23'}]},
-      {id:'lunges-on-track',name:'Lunges on Track',category:'legs',muscleGroups:['Quads','Glutes'],pb:{kg:24,reps:20,date:'2026-03-23'},pbHistory:[{kg:24,reps:20,date:'2026-03-23'}]},
-      {id:'squats-kettlebells',name:'Squats with Kettlebells',category:'legs',muscleGroups:['Quads','Glutes'],pb:{kg:14,reps:19,date:'2026-03-23'},pbHistory:[{kg:14,reps:19,date:'2026-03-23'}]},
-      {id:'leg-press',name:'Leg Press',category:'legs',muscleGroups:['Quads','Glutes'],pb:{kg:210,reps:10,date:'2026-03-10'},pbHistory:[{kg:210,reps:10,date:'2026-03-10'}]},
-      {id:'hack-squat-machine',name:'Hack Squat Machine',category:'legs',muscleGroups:['Quads'],pb:{kg:140,reps:10,date:'2026-03-10'},pbHistory:[{kg:140,reps:10,date:'2026-03-10'}]},
-      {id:'prone-leg-curl',name:'Prone Leg Curl',category:'legs',muscleGroups:['Hamstrings'],pb:{kg:50,reps:6,date:'2026-03-10'},pbHistory:[{kg:50,reps:6,date:'2026-03-10'}]},
-      {id:'leg-curl-machine',name:'Leg Curl Machine',category:'legs',muscleGroups:['Hamstrings'],pb:{kg:68,reps:10,date:'2026-03-23'},pbHistory:[{kg:68,reps:10,date:'2026-03-23'}]},
-      {id:'calf-raise-free-weights',name:'Calf Raise Free Weights',category:'legs',muscleGroups:['Calves'],pb:{kg:100,reps:5,date:'2026-03-23'},pbHistory:[{kg:100,reps:5,date:'2026-03-23'}]},
-      {id:'calfs-on-machine',name:'Calfs on Machine',category:'legs',muscleGroups:['Calves'],pb:{kg:154,reps:10,date:'2026-03-10'},pbHistory:[{kg:154,reps:10,date:'2026-03-10'}]},
-      {id:'outter-thigh-machine',name:'Outter Thigh Machine',category:'legs',muscleGroups:['Abductors'],pb:{kg:91,reps:10,date:'2026-03-23'},pbHistory:[{kg:91,reps:10,date:'2026-03-23'}]},
+      {id:'leg-extension',name:'Leg Extension',category:'legs',muscleGroups:['Quads'],pb:null,pbHistory:[]},
+      {id:'lunges-on-track',name:'Lunges on Track',category:'legs',muscleGroups:['Quads','Glutes'],pb:null,pbHistory:[]},
+      {id:'squats-kettlebells',name:'Squats with Kettlebells',category:'legs',muscleGroups:['Quads','Glutes'],pb:null,pbHistory:[]},
+      {id:'leg-press',name:'Leg Press',category:'legs',muscleGroups:['Quads','Glutes'],pb:null,pbHistory:[]},
+      {id:'hack-squat-machine',name:'Hack Squat Machine',category:'legs',muscleGroups:['Quads'],pb:null,pbHistory:[]},
+      {id:'prone-leg-curl',name:'Prone Leg Curl',category:'legs',muscleGroups:['Hamstrings'],pb:null,pbHistory:[]},
+      {id:'leg-curl-machine',name:'Leg Curl Machine',category:'legs',muscleGroups:['Hamstrings'],pb:null,pbHistory:[]},
+      {id:'calf-raise-free-weights',name:'Calf Raise Free Weights',category:'legs',muscleGroups:['Calves'],pb:null,pbHistory:[]},
+      {id:'calfs-on-machine',name:'Calfs on Machine',category:'legs',muscleGroups:['Calves'],pb:null,pbHistory:[]},
+      {id:'outter-thigh-machine',name:'Outter Thigh Machine',category:'legs',muscleGroups:['Abductors'],pb:null,pbHistory:[]},
       {id:'backwards-lunges-bar',name:'Backwards Lunges with Bar',category:'legs',muscleGroups:['Quads','Glutes'],pb:null,pbHistory:[]},
+      {id:'squats-barbell',name:'Squats (Barbell)',category:'legs',muscleGroups:['Quads','Glutes'],pb:null,pbHistory:[]},
+      {id:'calf-raise-machine',name:'Calf Raise Machine',category:'legs',muscleGroups:['Calves'],pb:null,pbHistory:[]},
 
-      // CARDIO
+      // BACK / BICEPS
+      {id:'seated-row-machine',name:'Seated Row Machine',category:'back',muscleGroups:['Back'],pb:null,pbHistory:[]},
+      {id:'lie-down-dumbbell-bench',name:'Lie Down Dumbbell Bench',category:'back',muscleGroups:['Back'],pb:null,pbHistory:[]},
+      {id:'pulldown-free-weight',name:'Pulldown Free Weight',category:'back',muscleGroups:['Back'],pb:null,pbHistory:[]},
+      {id:'rear-delt-machine',name:'Rear Delt Machine',category:'back',muscleGroups:['Rear Delts'],pb:null,pbHistory:[]},
+      {id:'bicep-curl-machine',name:'Bicep Curl Machine',category:'back',muscleGroups:['Biceps'],pb:null,pbHistory:[]},
+      {id:'wide-grip-lat-pulldown',name:'Wide Grip Lat Pulldown',category:'back',muscleGroups:['Back','Lats'],pb:null,pbHistory:[]},
+      {id:'narrow-grip-lat-pulldown',name:'Narrow Grip Lat Pulldown',category:'back',muscleGroups:['Back','Lats'],pb:null,pbHistory:[]},
+      {id:'low-row-machine',name:'Low Row Machine',category:'back',muscleGroups:['Back'],pb:null,pbHistory:[]},
+      {id:'bicep-bar-curl',name:'Bicep Bar Curl',category:'back',muscleGroups:['Biceps'],pb:null,pbHistory:[]},
+      {id:'sitting-forward-dumbbell-curl',name:'Sitting Forward Dumbbell Curl',category:'back',muscleGroups:['Biceps'],pb:null,pbHistory:[]},
+      {id:'dumbbell-curl-slow',name:'Dumbbell Curl Slow',category:'back',muscleGroups:['Biceps'],pb:null,pbHistory:[]},
+      {id:'bend-over-rows',name:'Bend Over Rows',category:'back',muscleGroups:['Back'],pb:null,pbHistory:[]},
+      {id:'standing-hammer-curls',name:'Standing Hammer Curls',category:'back',muscleGroups:['Biceps'],pb:null,pbHistory:[]},
+      {id:'sitting-back-dumbbell-curl',name:'Sitting Back Dumbbell Curl',category:'back',muscleGroups:['Biceps'],pb:null,pbHistory:[]},
+      {id:'standup-dumbbell-curl',name:'Standup Dumbbell Curl',category:'back',muscleGroups:['Biceps'],pb:null,pbHistory:[]},
+
+      // CARDIO (not assigned to any workout day)
       {id:'cycling',name:'Cycling',category:'cardio',muscleGroups:['Cardio','Legs'],type:'cardio',inputLabels:{field1:'MINS',field2:'KM'},pb:null,pbHistory:[]},
       {id:'incline-walk',name:'Incline Walk',category:'cardio',muscleGroups:['Cardio','Legs'],type:'cardio',inputLabels:{field1:'MINS',field2:'INCLINE'},pb:null,pbHistory:[]},
 
-      // ABS / STOMACH
+      // ABS (not assigned to any workout day)
       {id:'crunches',name:'Crunches',category:'abs',muscleGroups:['Abs'],type:'bodyweight',pb:null,pbHistory:[]},
       {id:'sit-ups',name:'Sit Ups',category:'abs',muscleGroups:['Abs'],type:'bodyweight',pb:null,pbHistory:[]},
       {id:'leg-raises',name:'Leg Raises',category:'abs',muscleGroups:['Lower Abs'],type:'bodyweight',pb:null,pbHistory:[]},
@@ -198,16 +221,106 @@ const Store = {
     ];
 
     const workoutDays = [
-      {id:'chest',name:'Chest',icon:'fitness_center',color:'primary',exerciseIds:['standing-chest-press','bench-press','incline-bench-press','incline-dumbbells','flat-bench-dumbbells','pec-fly-machine','skull-crushers','triceps-extension-machine','bar-pull-down','dips']},
-      {id:'legs',name:'Legs',icon:'directions_run',color:'secondary',exerciseIds:['leg-extension','lunges-on-track','squats-kettlebells','leg-press','hack-squat-machine','prone-leg-curl','leg-curl-machine','calf-raise-free-weights','calfs-on-machine','outter-thigh-machine','backwards-lunges-bar']},
+      {id:'chest',name:'Chest',icon:'fitness_center',color:'primary',exerciseIds:['standing-chest-press','bench-press','incline-bench-press','incline-dumbbells','flat-bench-dumbbells','pec-fly-machine','skull-crushers','triceps-extension-machine','bar-pull-down','dips','rope-pulldown']},
+      {id:'legs',name:'Legs',icon:'directions_run',color:'secondary',exerciseIds:['leg-extension','lunges-on-track','squats-kettlebells','leg-press','hack-squat-machine','prone-leg-curl','leg-curl-machine','calf-raise-free-weights','calfs-on-machine','outter-thigh-machine','backwards-lunges-bar','squats-barbell','calf-raise-machine']},
       {id:'shoulders-triceps',name:'Shoulders / Triceps',icon:'sports_martial_arts',color:'tertiary',exerciseIds:['shoulder-press-dumbbells','straight-bar-arm-raise','shoulder-shrugs','shoulder-press-machine','triceps-extension-machine','bar-pull-down','single-arm-raises-machine','skull-crushers','shoulder-lift-bar','dips']},
-      {id:'cardio-abs',name:'Cardio / Abs',icon:'directions_bike',color:'error',exerciseIds:['cycling','incline-walk','crunches','sit-ups','leg-raises','plank','russian-twists','mountain-climbers','bicycle-crunches','ab-rollout']},
+      {id:'back-biceps',name:'Back / Biceps',icon:'exercise',color:'secondary',exerciseIds:['seated-row-machine','lie-down-dumbbell-bench','pulldown-free-weight','rear-delt-machine','bicep-curl-machine','wide-grip-lat-pulldown','narrow-grip-lat-pulldown','low-row-machine','bicep-bar-curl','sitting-forward-dumbbell-curl','bend-over-rows','standing-hammer-curls','sitting-back-dumbbell-curl','standup-dumbbell-curl','dumbbell-curl-slow']},
     ];
 
+    // --- HISTORICAL SESSIONS ---
+    // Helper to build a session object
+    const S = (id, workoutDayId, date, exData) => {
+      const exercisesArr = exData.map(([exerciseId, kg, reps]) => ({
+        exerciseId,
+        sets: [{kg, reps, completed: true, isNewPb: false}],
+        newPb: false
+      }));
+      const totalVolume = exData.reduce((sum, [, kg, reps]) => sum + kg * reps, 0);
+      return {id, workoutDayId, date, duration: 3600, exercises: exercisesArr, totalVolume, pbsAchieved: 0, calories: 0};
+    };
+
+    const sessions = [
+      S('h-0','chest','2026-01-06T18:00:00.000Z',[['triceps-extension-machine',41,10],['dips',0,34],['bench-press',80,8],['standing-chest-press',77,6],['incline-bench-press',40,4],['incline-dumbbells',24,10],['shoulder-shrugs',40,10],['flat-bench-dumbbells',26,10],['skull-crushers',20,10],['shoulder-lift-bar',20,10],['dumbbell-arm-air-raise',14,8],['bar-pull-down',68,8],['rope-pulldown',54,15],['pec-fly-machine',68,7]]),
+      S('h-1','legs','2026-01-07T18:00:00.000Z',[['leg-curl-machine',59,10],['leg-press',900,10],['hack-squat-machine',80,10],['lunges-on-track',24,20],['calfs-on-machine',154,10],['outter-thigh-machine',82,10],['prone-leg-curl',45,5]]),
+      S('h-2','back-biceps','2026-01-09T18:00:00.000Z',[['bicep-curl-machine',32,10],['sitting-back-dumbbell-curl',20,5],['standup-dumbbell-curl',22,6],['bicep-bar-curl',20,30],['dumbbell-curl-slow',20,7],['sitting-forward-dumbbell-curl',18,17],['standing-hammer-curls',12,12],['low-row-machine',68,10],['rear-delt-machine',50,9],['seated-row-machine',64,7]]),
+      S('h-3','chest','2026-01-12T18:00:00.000Z',[['bench-press',70,7],['incline-bench-press',40,10],['incline-dumbbells',20,6],['flat-bench-dumbbells',26,10],['standing-chest-press',74,6],['skull-crushers',20,10],['shoulder-lift-bar',20,10],['shoulder-shrugs',36,10],['shoulder-press-machine',41,6],['dips',0,24]]),
+      S('h-4','legs','2026-01-14T18:00:00.000Z',[['leg-press',159,10],['hack-squat-machine',100,10],['leg-extension',100,10],['leg-curl-machine',64,4],['calf-raise-machine',65,10],['lunges-on-track',40,20],['outter-thigh-machine',82,10],['calfs-on-machine',154,10],['prone-leg-curl',45,5]]),
+      S('h-5','legs','2026-01-21T18:00:00.000Z',[['leg-press',170,8],['squats-barbell',60,8],['leg-extension',109,6],['leg-curl-machine',59,6],['lunges-on-track',40,20],['outter-thigh-machine',91,10],['prone-leg-curl',36,6],['calfs-on-machine',154,10],['hack-squat-machine',100,10],['calf-raise-machine',65,10]]),
+      S('h-6','back-biceps','2026-01-21T19:00:00.000Z',[['bicep-curl-machine',27,9],['low-row-machine',68,10],['rear-delt-machine',59,10],['seated-row-machine',74,10],['pulldown-free-weight',70,10],['bend-over-rows',40,10],['wide-grip-lat-pulldown',59,10],['sitting-back-dumbbell-curl',16,10],['bicep-bar-curl',20,30]]),
+      S('h-7','back-biceps','2026-01-22T18:00:00.000Z',[['rear-delt-machine',64,6],['pulldown-free-weight',70,7],['low-row-machine',73,7],['bicep-curl-machine',32,6],['wide-grip-lat-pulldown',41,10],['seated-row-machine',77,10],['bend-over-rows',50,7],['bicep-bar-curl',20,30],['sitting-forward-dumbbell-curl',18,17],['sitting-back-dumbbell-curl',16,10]]),
+      S('h-8','chest','2026-01-23T18:00:00.000Z',[['bench-press',80,10],['incline-bench-press',50,8],['incline-dumbbells',26,6],['flat-bench-dumbbells',30,5],['skull-crushers',20,10],['shoulder-lift-bar',20,10],['shoulder-shrugs',42,6],['standing-chest-press',77,9],['dips',0,28],['bar-pull-down',68,8],['rope-pulldown',54,15],['pec-fly-machine',68,7]]),
+      S('h-9','legs','2026-01-26T18:00:00.000Z',[['leg-extension',91,10],['squats-barbell',60,10],['leg-press',200,10],['hack-squat-machine',120,10],['calf-raise-machine',90,10],['outter-thigh-machine',91,10],['leg-curl-machine',64,10],['prone-leg-curl',36,6]]),
+      S('h-10','back-biceps','2026-01-27T18:00:00.000Z',[['pulldown-free-weight',50,7],['bicep-curl-machine',32,7],['seated-row-machine',82,10],['low-row-machine',73,10],['wide-grip-lat-pulldown',45,10],['bend-over-rows',50,7],['bicep-bar-curl',20,30],['rear-delt-machine',64,10]]),
+      S('h-11','chest','2026-01-28T18:00:00.000Z',[['bench-press',90,4],['dips',0,33],['incline-bench-press',60,6],['incline-dumbbells',26,10],['flat-bench-dumbbells',30,7],['standing-chest-press',64,6],['pec-fly-machine',68,10],['skull-crushers',30,6],['bar-pull-down',77,7],['rope-pulldown',54,15]]),
+      S('h-12','chest','2026-02-03T18:00:00.000Z',[['bench-press',80,10],['incline-bench-press',40,10],['standing-chest-press',50,10],['dips',0,40],['incline-dumbbells',20,10],['flat-bench-dumbbells',24,10],['skull-crushers',20,10],['pec-fly-machine',64,10],['triceps-extension-machine',18,10],['bar-pull-down',77,7]]),
+      S('h-13','legs','2026-02-04T18:00:00.000Z',[['lunges-on-track',16,20],['leg-extension',82,10],['leg-press',100,10],['hack-squat-machine',80,10],['calf-raise-machine',50,10],['calfs-on-machine',154,10]]),
+      S('h-14','back-biceps','2026-02-05T18:00:00.000Z',[['pulldown-free-weight',60,10],['rear-delt-machine',64,10],['low-row-machine',64,10],['wide-grip-lat-pulldown',59,10],['bicep-curl-machine',36,4],['bend-over-rows',60,8],['seated-row-machine',73,10],['standup-dumbbell-curl',20,11],['bicep-bar-curl',20,30]]),
+      S('h-15','shoulders-triceps','2026-02-08T18:00:00.000Z',[['triceps-extension-machine',26,9],['shoulder-press-machine',64,10],['shoulder-lift-bar',30,6],['skull-crushers',30,5],['shoulder-shrugs',42,8],['straight-bar-arm-raise',25,10],['bar-pull-down',68,8],['dips',0,30]]),
+      S('h-16','legs','2026-02-09T18:00:00.000Z',[['leg-extension',91,10],['leg-press',100,10],['hack-squat-machine',70,10],['lunges-on-track',16,18],['leg-curl-machine',59,7],['calf-raise-machine',75,8]]),
+      S('h-17','back-biceps','2026-02-11T18:00:00.000Z',[['rear-delt-machine',64,10],['wide-grip-lat-pulldown',59,10],['seated-row-machine',73,10],['pulldown-free-weight',80,10],['bend-over-rows',40,10],['low-row-machine',77,10],['bicep-curl-machine',27,4],['bicep-bar-curl',20,30],['sitting-forward-dumbbell-curl',20,15]]),
+      S('h-18','chest','2026-02-13T18:00:00.000Z',[['bench-press',90,7],['incline-bench-press',40,8],['incline-dumbbells',30,6],['flat-bench-dumbbells',36,7],['pec-fly-machine',77,10],['bar-pull-down',82,10],['triceps-extension-machine',18,10],['standing-chest-press',83,10],['dips',0,26]]),
+      S('h-19','back-biceps','2026-02-15T18:00:00.000Z',[['seated-row-machine',91,10],['lie-down-dumbbell-bench',10,10],['pulldown-free-weight',100,10],['rear-delt-machine',64,6],['bicep-curl-machine',32,5],['wide-grip-lat-pulldown',50,7],['narrow-grip-lat-pulldown',59,7],['low-row-machine',59,7],['bicep-bar-curl',20,30],['sitting-forward-dumbbell-curl',14,20]]),
+      S('h-20','legs','2026-02-17T18:00:00.000Z',[['leg-press',150,10],['hack-squat-machine',130,10],['lunges-on-track',16,20],['outter-thigh-machine',77,10],['leg-curl-machine',68,7],['calf-raise-machine',90,8],['leg-extension',50,10],['prone-leg-curl',46,4],['calfs-on-machine',136,10]]),
+      S('h-21','shoulders-triceps','2026-02-18T18:00:00.000Z',[['shoulder-press-dumbbells',28,6],['straight-bar-arm-raise',30,10],['skull-crushers',20,10],['shoulder-lift-bar',30,10],['shoulder-shrugs',42,8],['dips',0,40],['bar-pull-down',82,10],['triceps-extension-machine',27,5],['shoulder-press-machine',68,8]]),
+      S('h-22','back-biceps','2026-02-19T18:00:00.000Z',[['pulldown-free-weight',70,10],['wide-grip-lat-pulldown',59,10],['low-row-machine',82,6],['bicep-curl-machine',27,7],['seated-row-machine',86,10],['rear-delt-machine',73,4],['bend-over-rows',30,10],['bicep-bar-curl',20,30],['sitting-forward-dumbbell-curl',20,15]]),
+      S('h-23','chest','2026-02-24T18:00:00.000Z',[['bench-press',80,10],['incline-bench-press',40,8],['incline-dumbbells',30,6],['flat-bench-dumbbells',36,7],['pec-fly-machine',77,10],['bar-pull-down',82,10],['triceps-extension-machine',18,10],['standing-chest-press',83,10],['dips',0,26]]),
+      S('h-24','legs','2026-02-25T18:00:00.000Z',[['hack-squat-machine',60,10],['leg-press',101,10],['lunges-on-track',12,20],['leg-curl-machine',54,7],['calfs-on-machine',154,10],['leg-extension',73,10],['outter-thigh-machine',68,10],['prone-leg-curl',50,6],['calf-raise-free-weights',70,8]]),
+      S('h-25','back-biceps','2026-02-26T18:00:00.000Z',[['seated-row-machine',64,10],['lie-down-dumbbell-bench',14,10],['pulldown-free-weight',100,7],['wide-grip-lat-pulldown',64,6],['narrow-grip-lat-pulldown',54,10],['low-row-machine',73,10],['rear-delt-machine',59,7],['bicep-curl-machine',32,7],['sitting-forward-dumbbell-curl',16,20],['dumbbell-curl-slow',14,18],['bicep-bar-curl',20,30]]),
+      S('h-26','shoulders-triceps','2026-02-27T18:00:00.000Z',[['shoulder-press-dumbbells',18,10],['skull-crushers',15,10],['shoulder-lift-bar',15,10],['straight-bar-arm-raise',25,10],['dips',0,40],['shoulder-shrugs',42,8],['bar-pull-down',82,10],['shoulder-press-machine',68,8]]),
+      S('h-27','legs','2026-03-02T18:00:00.000Z',[['leg-extension',86,7],['calf-raise-free-weights',100,5],['hack-squat-machine',100,10],['lunges-on-track',16,20],['leg-curl-machine',59,7],['prone-leg-curl',36,6],['leg-press',100,10],['calfs-on-machine',154,10],['outter-thigh-machine',68,10]]),
+      S('h-28','chest','2026-03-03T18:00:00.000Z',[['incline-dumbbells',28,10],['flat-bench-dumbbells',36,7],['bench-press',100,3],['incline-bench-press',50,8],['dips',0,36],['triceps-extension-machine',27,6],['bar-pull-down',82,10]]),
+      S('h-29','back-biceps','2026-03-05T18:00:00.000Z',[['lie-down-dumbbell-bench',10,10],['wide-grip-lat-pulldown',50,10],['narrow-grip-lat-pulldown',64,7],['low-row-machine',68,10],['seated-row-machine',77,10],['rear-delt-machine',59,10],['pulldown-free-weight',100,4],['bicep-bar-curl',20,30],['bicep-curl-machine',18,7],['sitting-forward-dumbbell-curl',14,20]]),
+      S('h-30','legs','2026-03-06T18:00:00.000Z',[['lunges-on-track',12,20],['leg-press',100,10],['hack-squat-machine',120,10],['leg-extension',73,7],['calf-raise-free-weights',100,5],['leg-curl-machine',52,7],['prone-leg-curl',36,6],['calfs-on-machine',154,10],['outter-thigh-machine',68,10]]),
+      S('h-31','shoulders-triceps','2026-03-08T18:00:00.000Z',[['shoulder-press-dumbbells',26,8],['straight-bar-arm-raise',30,10],['skull-crushers',30,10],['shoulder-lift-bar',30,10],['shoulder-shrugs',40,6],['triceps-extension-machine',23,10],['dips',0,40],['bar-pull-down',82,10],['single-arm-raises-machine',18,10],['shoulder-press-machine',68,10]]),
+      S('h-32','legs','2026-03-10T18:00:00.000Z',[['hack-squat-machine',140,10],['lunges-on-track',16,20],['leg-curl-machine',68,7],['leg-extension',73,10],['outter-thigh-machine',71,10],['prone-leg-curl',36,8],['leg-press',210,10],['calf-raise-free-weights',100,5],['calfs-on-machine',154,10]]),
+      S('h-33','chest','2026-03-12T18:00:00.000Z',[['bench-press',90,10],['incline-dumbbells',30,10],['standing-chest-press',82,6],['incline-bench-press',50,10],['flat-bench-dumbbells',36,8],['skull-crushers',20,5],['triceps-extension-machine',18,10],['bar-pull-down',73,7],['dips',0,36],['pec-fly-machine',73,10]]),
+      S('h-34','legs','2026-03-17T18:00:00.000Z',[['squats-kettlebells',12,10],['lunges-on-track',24,20],['leg-extension',77,10],['leg-press',150,10],['hack-squat-machine',110,10],['calf-raise-free-weights',100,5],['calfs-on-machine',136,10],['leg-curl-machine',68,10],['outter-thigh-machine',91,10],['prone-leg-curl',41,6]]),
+      S('h-35','chest','2026-03-20T18:00:00.000Z',[['standing-chest-press',95,6],['bench-press',100,5],['incline-bench-press',60,7],['incline-dumbbells',34,4],['flat-bench-dumbbells',36,8],['skull-crushers',30,7],['triceps-extension-machine',23,7],['pec-fly-machine',82,10],['bar-pull-down',73,7],['dips',0,36]]),
+      S('h-36','legs','2026-03-23T18:00:00.000Z',[['leg-extension',83,10],['lunges-on-track',14,20],['squats-kettlebells',14,19],['leg-press',100,10],['hack-squat-machine',70,10],['prone-leg-curl',36,10],['leg-curl-machine',68,10],['calf-raise-free-weights',100,5],['calfs-on-machine',136,10],['outter-thigh-machine',91,10]]),
+    ];
+
+    // --- PB CALCULATION ---
+    // Process sessions oldest->newest to build PB history naturally
+    const exMap = {};
+    exercises.forEach(ex => { exMap[ex.id] = ex; });
+
+    sessions.forEach(session => {
+      const sessionDate = session.date.slice(0, 10);
+      session.exercises.forEach(se => {
+        const ex = exMap[se.exerciseId];
+        if (!ex) return;
+        se.sets.forEach(set => {
+          const kg = set.kg;
+          const reps = set.reps;
+          if (kg === 0 && reps === 0) return;
+          const exType = ex.type || 'strength';
+          let isNew = false;
+          if (!ex.pb) {
+            isNew = true;
+          } else if (exType === 'bodyweight') {
+            isNew = reps > ex.pb.reps;
+          } else {
+            // strength: higher kg wins, or same kg with more reps
+            isNew = (kg > ex.pb.kg) || (kg === ex.pb.kg && reps > ex.pb.reps);
+          }
+          if (isNew) {
+            const pbEntry = {kg, reps, date: sessionDate};
+            ex.pb = pbEntry;
+            ex.pbHistory.push(pbEntry);
+            set.isNewPb = true;
+            se.newPb = true;
+          }
+        });
+      });
+      // Recalculate pbsAchieved for this session
+      session.pbsAchieved = session.exercises.filter(se => se.newPb).length;
+    });
+
+    sessions.reverse();
     this.data = {
       exercises,
       workoutDays,
-      sessions: [],
+      sessions,
       activeSession: null,
       settings: { currentPhase:'Hypertrophy', weeklyGoal:5 }
     };
