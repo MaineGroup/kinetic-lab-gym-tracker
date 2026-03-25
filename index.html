@@ -552,6 +552,11 @@ const Router = {
     } else if (parts[0] === 'train') {
       html = Views.train();
       activeTab = 'train';
+    } else if (parts[0] === 'library' && parts[1] === 'session' && parts[2]) {
+      html = Views.librarySessionDetail(parts[2]);
+      activeTab = 'library';
+      backBtn.classList.remove('hidden');
+      backBtn.classList.add('flex');
     } else if (parts[0] === 'library' && parts[1]) {
       html = Views.exerciseDetail(parts[1]);
       activeTab = 'library';
@@ -588,9 +593,10 @@ const Router = {
     app.innerHTML = `<div class="view-enter">${html}</div>`;
     this.updateNav(activeTab);
     this.bindEvents();
-    // Render charts if on stats page
-    if (activeTab === 'stats' && typeof Chart !== 'undefined') {
-      this.renderCharts();
+    // Render charts
+    if (typeof Chart !== 'undefined') {
+      if (activeTab === 'stats') this.renderCharts();
+      if (parts[0] === 'library' && parts[1] === 'session' && parts[2]) this.renderSessionChart(parts[2]);
     }
   },
 
@@ -603,6 +609,42 @@ const Router = {
       } else {
         tab.className = 'nav-tab flex flex-col items-center justify-center p-2 min-w-[60px] text-zinc-500 transition-all';
         tab.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 0";
+      }
+    });
+  },
+
+  renderSessionChart(sessionId) {
+    const session = Store.getSession(sessionId);
+    if (!session) return;
+    const el = document.getElementById('sessionExChart');
+    if (!el) return;
+    const labels = [];
+    const data = [];
+    const colors = [];
+    const colorPalette = ['#9cff93','#00e3fd','#a68cff','#ff7351','#00fc40','#00d7f0'];
+    session.exercises.forEach((se, i) => {
+      const ex = Store.getExercise(se.exerciseId);
+      if (!ex) return;
+      labels.push(ex.name.length > 14 ? ex.name.slice(0,14) + '..' : ex.name);
+      let vol = 0;
+      se.sets.forEach(s => { vol += (parseFloat(s.kg)||0) * (parseInt(s.reps)||0); });
+      data.push(vol);
+      colors.push(colorPalette[i % colorPalette.length]);
+    });
+    new Chart(el, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{ data, backgroundColor: colors.map(c => c + '40'), borderColor: colors, borderWidth: 1 }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#767576', font: { size: 9, family: 'Manrope' }, callback: v => v >= 1000 ? (v/1000)+'k' : v } },
+          y: { grid: { display: false }, ticks: { color: '#adaaab', font: { size: 9, family: 'Manrope' } } }
+        }
       }
     });
   },
@@ -1138,28 +1180,190 @@ const Views = {
     `;
   },
 
-  // ---- EXERCISE LIBRARY ----
+  // ---- LIBRARY (Session Journal) ----
   library() {
     const topTitle = document.getElementById('topTitle');
     topTitle.textContent = 'LIBRARY';
     topTitle.className = 'text-sm font-bold tracking-widest text-zinc-400 font-headline uppercase';
 
-    const categories = [...new Set(Store.data.exercises.map(e => e.category))];
+    const sessions = Store.data.sessions;
 
+    // Tab: sessions vs exercises
     return `
       <section class="space-y-4">
-        <div class="relative">
-          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-lg">search</span>
-          <input id="librarySearch" type="text" placeholder="Search exercises..." class="w-full bg-surface-container-low border border-outline-variant/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-1 focus:ring-primary/40 focus:border-primary/40 placeholder:text-zinc-600"/>
+        <!-- Tab switcher -->
+        <div class="flex gap-2 mb-2">
+          <button class="lib-tab flex-1 py-2.5 rounded-xl font-headline font-bold text-sm uppercase tracking-widest bg-primary/20 text-primary border border-primary/30" data-lib-tab="sessions">Sessions</button>
+          <button class="lib-tab flex-1 py-2.5 rounded-xl font-headline font-bold text-sm uppercase tracking-widest bg-surface-container-low text-zinc-400 border border-outline-variant/10" data-lib-tab="exercises">Exercises</button>
         </div>
-        <div id="filterPills" class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-          <button class="filter-pill bg-primary/20 text-primary px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase shrink-0 border border-primary/30" data-filter="all">All</button>
-          ${categories.map(c => `<button class="filter-pill bg-surface-container-low text-zinc-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase shrink-0 border border-outline-variant/10" data-filter="${c}">${c}</button>`).join('')}
-        </div>
-        <div id="exerciseList" class="space-y-2">
-          ${this._renderExerciseList(Store.data.exercises)}
+
+        <div id="libContent">
+          ${this._renderSessionJournal(sessions)}
         </div>
       </section>
+    `;
+  },
+
+  _renderSessionJournal(sessions) {
+    if (!sessions.length) {
+      return '<div class="text-center py-16"><span class="material-symbols-outlined text-5xl text-zinc-700">calendar_month</span><p class="text-zinc-500 font-headline font-bold mt-3">No sessions yet</p><p class="text-zinc-600 text-sm mt-1">Complete a workout to see it here</p></div>';
+    }
+
+    return '<div class="space-y-3">' + sessions.map(s => {
+      const day = Store.getWorkoutDay(s.workoutDayId);
+      const d = new Date(s.date);
+      const dateStr = d.toLocaleDateString('en-GB', {weekday:'short'}) + ' ' + d.getDate() + '.' + (d.getMonth()+1) + '.' + String(d.getFullYear()).slice(2);
+      const img = IMG[day?.id === 'cardio-abs' ? 'cardio' : day?.id === 'shoulders-triceps' ? 'shoulders' : day?.id] || IMG.gym;
+      const exCount = s.exercises ? s.exercises.length : 0;
+      const colorMap = {primary:'border-primary/30',secondary:'border-secondary/30',tertiary:'border-tertiary/30',error:'border-error/30'};
+      const borderClass = colorMap[day?.color] || 'border-primary/30';
+
+      return '<a href="#/library/session/' + s.id + '" class="glass rounded-2xl overflow-hidden block active:scale-[0.98] transition-all group border ' + borderClass + '">' +
+        '<div class="flex gap-3 p-3">' +
+          '<div class="w-20 h-20 rounded-xl overflow-hidden shrink-0">' +
+            '<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src="' + img + '" alt=""/>' +
+          '</div>' +
+          '<div class="flex flex-col justify-between py-0.5 min-w-0 flex-1">' +
+            '<div>' +
+              '<span class="font-label text-[9px] font-extrabold uppercase tracking-[0.15em] text-' + (day?.color || 'primary') + '">' + dateStr + '</span>' +
+              '<h4 class="font-headline font-bold text-base truncate group-hover:text-primary transition-colors">' + (day?.name || 'Workout') + '</h4>' +
+            '</div>' +
+            '<div class="flex gap-4 items-center">' +
+              '<div class="flex flex-col"><span class="text-[8px] uppercase font-bold text-zinc-500 tracking-widest">Volume</span><span class="text-xs font-bold">' + U.formatVolume(s.totalVolume) + ' kg</span></div>' +
+              '<div class="flex flex-col"><span class="text-[8px] uppercase font-bold text-zinc-500 tracking-widest">Exercises</span><span class="text-xs font-bold">' + exCount + '</span></div>' +
+              (s.pbsAchieved > 0 ? '<span class="bg-primary text-black text-[8px] font-black px-1.5 py-0.5 rounded-sm tracking-tighter uppercase italic">' + s.pbsAchieved + ' PB</span>' : '') +
+              (s.calories ? '<div class="flex flex-col"><span class="text-[8px] uppercase font-bold text-zinc-500 tracking-widest">Kcal</span><span class="text-xs font-bold text-error">' + s.calories + '</span></div>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="flex items-center"><span class="material-symbols-outlined text-zinc-600 text-lg">chevron_right</span></div>' +
+        '</div>' +
+      '</a>';
+    }).join('') + '</div>';
+  },
+
+  _renderExerciseBrowse() {
+    const categories = [...new Set(Store.data.exercises.map(e => e.category))];
+    return '<div class="space-y-4">' +
+      '<div class="relative"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-lg">search</span><input id="librarySearch" type="text" placeholder="Search exercises..." class="w-full bg-surface-container-low border border-outline-variant/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-1 focus:ring-primary/40 focus:border-primary/40 placeholder:text-zinc-600"/></div>' +
+      '<div id="filterPills" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"><button class="filter-pill bg-primary/20 text-primary px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase shrink-0 border border-primary/30" data-filter="all">All</button>' +
+      categories.map(c => '<button class="filter-pill bg-surface-container-low text-zinc-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase shrink-0 border border-outline-variant/10" data-filter="' + c + '">' + c + '</button>').join('') +
+      '</div><div id="exerciseList" class="space-y-2">' + this._renderExerciseList(Store.data.exercises) + '</div></div>';
+  },
+
+  // Session detail with charts (for library view)
+  librarySessionDetail(sessionId) {
+    const session = Store.getSession(sessionId);
+    if (!session) return '<p class="text-center text-zinc-500 py-20">Session not found</p>';
+    const day = Store.getWorkoutDay(session.workoutDayId);
+
+    const topTitle = document.getElementById('topTitle');
+    topTitle.textContent = 'SESSION';
+    topTitle.className = 'text-sm font-bold tracking-widest text-zinc-400 font-headline uppercase';
+
+    const d = new Date(session.date);
+    const dateStr = d.toLocaleDateString('en-GB', {weekday:'long'}) + ' ' + d.getDate() + '.' + (d.getMonth()+1) + '.' + String(d.getFullYear()).slice(2);
+    const img = IMG[day?.id === 'cardio-abs' ? 'cardio' : day?.id === 'shoulders-triceps' ? 'shoulders' : day?.id] || IMG.gym;
+
+    // Build exercise volume data for chart
+    const exLabels = [];
+    const exVolumes = [];
+    session.exercises.forEach(se => {
+      const ex = Store.getExercise(se.exerciseId);
+      if (!ex) return;
+      exLabels.push(ex.name.length > 12 ? ex.name.slice(0,12) + '..' : ex.name);
+      let vol = 0;
+      se.sets.forEach(s => { vol += (parseFloat(s.kg)||0) * (parseInt(s.reps)||0); });
+      exVolumes.push(vol);
+    });
+
+    return `
+      <!-- Hero -->
+      <div class="relative rounded-2xl overflow-hidden h-40 mb-6">
+        <img class="w-full h-full object-cover" src="${img}" alt=""/>
+        <div class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
+        <div class="absolute bottom-4 left-5 right-5">
+          <span class="text-primary font-headline font-bold tracking-[0.15em] text-[10px] uppercase">${dateStr}</span>
+          <h1 class="text-3xl font-headline font-black tracking-tighter text-white leading-none">${(day?.name || 'WORKOUT').toUpperCase()}</h1>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-3 gap-2 mb-6">
+        <div class="glass p-3 rounded-xl border border-outline-variant/10 text-center">
+          <span class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold block">Volume</span>
+          <span class="text-lg font-headline font-black text-primary">${U.formatVolume(session.totalVolume)}<span class="text-[10px] text-zinc-500 ml-0.5">kg</span></span>
+        </div>
+        <div class="glass p-3 rounded-xl border border-outline-variant/10 text-center">
+          <span class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold block">Duration</span>
+          <span class="text-lg font-headline font-black">${Math.floor((session.duration||0)/60)}<span class="text-secondary text-sm">m</span></span>
+        </div>
+        <div class="glass p-3 rounded-xl border border-outline-variant/10 text-center">
+          <span class="text-[9px] ${session.pbsAchieved > 0 ? 'text-primary' : 'text-zinc-500'} uppercase tracking-widest font-bold block">PBs</span>
+          <span class="text-lg font-headline font-black ${session.pbsAchieved > 0 ? 'text-primary' : ''}">${session.pbsAchieved}</span>
+        </div>
+      </div>
+      ${session.calories ? '<div class="glass p-3 rounded-xl border border-outline-variant/10 text-center mb-6"><span class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold block">Calories</span><span class="text-lg font-headline font-black text-error">' + session.calories + '<span class="text-[10px] text-zinc-500 ml-0.5">kcal</span></span></div>' : ''}
+
+      <!-- Volume per exercise chart -->
+      ${exLabels.length > 0 ? '<div class="glass rounded-2xl p-4 border border-outline-variant/10 mb-6"><h3 class="text-zinc-400 font-headline font-bold text-xs tracking-widest uppercase mb-3">Volume per Exercise</h3><div style="height:' + Math.max(140, exLabels.length * 28) + 'px"><canvas id="sessionExChart"></canvas></div></div>' : ''}
+
+      <!-- Exercise Breakdown -->
+      <h3 class="text-zinc-400 font-headline font-bold text-xs tracking-widest uppercase mb-3">Exercise Breakdown</h3>
+      <div class="space-y-3">
+        ${session.exercises.map(sessionEx => {
+          const ex = Store.getExercise(sessionEx.exerciseId);
+          if (!ex) return '';
+          const exImg = IMG.getForExercise(ex);
+          const exType = ex.type || 'strength';
+          return `
+            <div class="${sessionEx.newPb ? 'ring-1 ring-primary/30' : ''} bg-surface-container-low rounded-xl overflow-hidden">
+              <div class="p-4 space-y-2">
+                <div class="flex items-start gap-3">
+                  <div class="w-12 h-12 rounded-lg overflow-hidden shrink-0">
+                    <img class="w-full h-full object-cover" src="${exImg}" alt=""/>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                      ${sessionEx.newPb ? '<span class="bg-primary text-black text-[7px] font-black px-1.5 py-0.5 rounded-sm tracking-tighter uppercase italic shadow-[0_0_10px_rgba(156,255,147,0.5)]">NEW PB</span>' : ''}
+                      <h4 class="font-headline font-bold text-sm truncate">${ex.name}</h4>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mt-0.5">
+                      ${ex.muscleGroups.slice(0,2).map(mg => '<span class="text-[8px] text-zinc-500 uppercase tracking-wider">' + mg + '</span>').join('<span class="text-zinc-700">&middot;</span>')}
+                    </div>
+                  </div>
+                  <div class="bg-surface-container-highest rounded-lg px-2 py-1 text-center shrink-0">
+                    <span class="block text-[7px] uppercase text-zinc-500 font-bold">PB</span>
+                    <span class="text-primary font-headline font-bold text-[10px]">${ex.pb ? Views._formatPBText(ex) : '--'}</span>
+                  </div>
+                </div>
+                <div class="space-y-1">
+                  ${sessionEx.sets.map((set, i) => {
+                    let setText = '';
+                    if (exType === 'cardio') {
+                      const l1 = ex.inputLabels?.field1?.toLowerCase() || 'mins';
+                      const l2 = ex.inputLabels?.field2?.toLowerCase() || '';
+                      setText = l2 ? set.kg + l1 + ' / ' + set.reps + l2 : set.kg + l1;
+                    } else if (exType === 'bodyweight') {
+                      setText = set.reps + ' reps';
+                    } else {
+                      setText = (set.kg > 0 ? set.kg + 'kg x ' : '') + set.reps + ' reps';
+                    }
+                    return '<div class="flex items-center gap-2 ' + (set.isNewPb ? 'bg-primary/5 rounded px-2 py-0.5 border border-primary/10' : '') + '"><span class="text-zinc-600 text-[10px] font-bold w-4">S' + (i+1) + '</span><span class="font-headline font-bold text-xs">' + setText + '</span>' + (set.isNewPb ? '<span class="material-symbols-outlined text-primary text-xs" style="font-variation-settings:\'FILL\' 1">stars</span>' : '') + '</div>';
+                  }).join('')}
+                </div>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+
+      <!-- Footer -->
+      <div class="rounded-2xl overflow-hidden h-24 relative mt-6">
+        <img class="w-full h-full object-cover opacity-40" src="${IMG.gymFooter}" alt=""/>
+        <div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+        <div class="absolute bottom-3 left-4">
+          <p class="text-primary font-headline font-black italic text-lg tracking-tighter">KEEP PUSHING</p>
+        </div>
+      </div>
     `;
   },
 
@@ -1658,6 +1862,23 @@ document.addEventListener('click', (e) => {
       el.className = el.className.replace(/ring-2 ring-\w+\/30/g, '');
     });
     btn.className += ' ring-2 ring-' + btn.dataset.color + '/30';
+  }
+
+  // Library tab switcher
+  if (btn.classList.contains('lib-tab')) {
+    document.querySelectorAll('.lib-tab').forEach(el => {
+      el.className = 'lib-tab flex-1 py-2.5 rounded-xl font-headline font-bold text-sm uppercase tracking-widest bg-surface-container-low text-zinc-400 border border-outline-variant/10';
+    });
+    btn.className = 'lib-tab flex-1 py-2.5 rounded-xl font-headline font-bold text-sm uppercase tracking-widest bg-primary/20 text-primary border border-primary/30';
+    const tab = btn.dataset.libTab;
+    const container = document.getElementById('libContent');
+    if (container) {
+      if (tab === 'sessions') {
+        container.innerHTML = Views._renderSessionJournal(Store.data.sessions);
+      } else {
+        container.innerHTML = Views._renderExerciseBrowse();
+      }
+    }
   }
 
   // Library filter pills
