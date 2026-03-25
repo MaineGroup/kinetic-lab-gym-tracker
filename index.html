@@ -837,9 +837,27 @@ const Views = {
     topTitle.textContent = 'TRAIN';
     topTitle.className = 'text-xl font-black tracking-tighter text-white font-headline';
 
+    const activeSession = SessionManager.getActive();
+    const totalSessions = Store.data.sessions.length;
+    const streak = U.getStreak();
+
     return `
+      <!-- Hero Banner -->
+      <section class="relative rounded-3xl overflow-hidden min-h-[180px] flex flex-col justify-end p-6 mb-6">
+        <img class="absolute inset-0 w-full h-full object-cover" src="${IMG.gym}" alt=""/>
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
+        <div class="relative z-10 space-y-2">
+          <div class="flex items-center gap-3">
+            <span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-[9px] font-bold tracking-widest font-headline border border-primary/30 uppercase">${totalSessions} sessions logged</span>
+            ${streak > 0 ? '<span class="bg-error/20 text-error px-3 py-1 rounded-full text-[9px] font-bold tracking-widest font-headline border border-error/30 uppercase">' + streak + ' day streak</span>' : ''}
+          </div>
+          <h2 class="text-3xl font-headline font-extrabold tracking-tighter">LET&apos;S<br/>WORK<span class="text-primary">.</span></h2>
+          ${activeSession ? '<a href="#/train/' + activeSession.workoutDayId + '" class="inline-flex items-center gap-2 bg-gradient-to-r from-secondary to-secondary-container text-surface-container-lowest px-5 py-2.5 rounded-full font-headline font-black uppercase tracking-widest text-xs active:scale-95 transition-all mt-1"><span class="material-symbols-outlined text-base" style="font-variation-settings:\'FILL\' 1">play_arrow</span>RESUME SESSION</a>' : ''}
+        </div>
+      </section>
+
       <section class="space-y-4 mb-6">
-        <h2 class="text-2xl font-headline font-bold tracking-tight">Choose Your Workout</h2>
+        <h2 class="text-lg font-headline font-bold uppercase tracking-tight">Choose Your Workout</h2>
         <div class="space-y-3">
           ${days.map(day => {
             const exCount = day.exerciseIds.length;
